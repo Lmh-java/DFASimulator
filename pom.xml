@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.github.lmh-java</groupId>
+  <artifactId>simulator-parent</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <description>A state-of-art simulator for users to create, validate, test DFAs.</description>
+  <name>DFASimulator</name>
+  <url>https://github.com/Lmh-java/DFASimulator</url>
+  <inceptionYear>2024</inceptionYear>
+
+  <modules>
+    <module>simulator-core</module>
+    <module>simulator-ui</module>
+  </modules>
+
+  <licenses>
+    <license>
+      <name>Apache License Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+      <!-- Description: https://www.apache.org/licenses/LICENSE-2.0-->
+      <comments>An OSS license for the goal of providing reliable and long-lived software products</comments>
+    </license>
+  </licenses>
+
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.deploy.skip>false</maven.deploy.skip>
+
+    <!-- Dependency Versions -->
+    <junit.version>5.8.2</junit.version>
+
+    <!-- Plugin Versions -->
+    <jacoco.version>0.8.11</jacoco.version>
+    <surefire.version>2.22.0</surefire.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!--  JUnit Dependency  -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!--  JUnit Dependency  -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <!-- Use new version of surefire, otherwise JUnit5 hook methods will fail to run -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+      </plugin>
+
+      <!--
+        Generate Code Coverage Report
+        See Example from https://github.com/codecov/example-java-maven/blob/main/pom.xml
+       -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+        <configuration>
+          <!-- Exclude classes from code coverage report  -->
+          <excludes>org/faststate/benchmark/*</excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
