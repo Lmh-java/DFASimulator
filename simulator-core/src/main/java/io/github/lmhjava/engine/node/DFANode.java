@@ -16,11 +16,28 @@ public class DFANode {
     private final Map<String, DFAEdge> cache;
     // is current node selected
     private boolean onCurrentState;
+    // content of the node
+    private String content;
 
     public DFANode() {
         this.edges = new ArrayList<>();
         this.cache = new HashMap<>();
         this.onCurrentState = false;
+    }
+
+    public DFANode(String content) {
+        this.edges = new ArrayList<>();
+        this.cache = new HashMap<>();
+        this.onCurrentState = false;
+        this.content = content;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public List<DFAEdge> getEdges() {

@@ -136,6 +136,7 @@ public class DFAController {
      * @return whether successfully added or not.
      */
     public boolean addEdge(DFAEdge edge) {
+        // TODO: complete checks for duplicate transitions (duplicate trigger alphabet)
         assert edge != null;
         // check preconditions
         if (edge.getTail() == null || edge.getAlphabet() == null || edge.getHead() == null) return false;

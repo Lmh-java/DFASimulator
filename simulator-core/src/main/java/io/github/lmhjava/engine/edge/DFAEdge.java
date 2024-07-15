@@ -2,6 +2,7 @@ package io.github.lmhjava.engine.edge;
 
 import io.github.lmhjava.engine.node.DFANode;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -17,6 +18,7 @@ public class DFAEdge {
     public DFAEdge(DFANode tail, DFANode head) {
         this.tail = tail;
         this.head = head;
+        this.alphabet = new HashSet<>();
     }
 
     public DFANode getHead() {
