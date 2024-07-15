@@ -13,7 +13,7 @@ public class DFANode {
     // e.g. DFAEdges which getTail() == this.
     private List<DFAEdge> edges;
     // cache for quick lookup transitions by inputs
-    private Map<String, DFAEdge> cache;
+    private final Map<String, DFAEdge> cache;
     // is current node selected
     private boolean onCurrentState;
 

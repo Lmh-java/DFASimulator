@@ -1,7 +1,6 @@
 package io.github.lmhjava.engine.dfa;
 
 import io.github.lmhjava.engine.edge.DFAEdge;
-import io.github.lmhjava.engine.exception.DFAValidationException;
 import io.github.lmhjava.engine.exception.NextNodeUndefException;
 import io.github.lmhjava.engine.node.DFANode;
 
@@ -15,16 +14,89 @@ public class DFAController {
     private final List<DFANode> nodeList;
     private DFANode currentNode;
     private DFANode initialNode;
-
-    public Set<String> getAlphabetSet() {
-        return alphabetSet;
-    }
-
-    public void setAlphabetSet(Set<String> alphabetSet) {
-        this.alphabetSet = alphabetSet;
-    }
-
     private Set<String> alphabetSet;
+
+    /**
+     * Returns the general alphabet set of this DFA.
+     *
+     * @return alphabet set of this DFA.
+     */
+    public Set<String> getAlphabetSet() {
+        return new HashSet<>(alphabetSet);
+    }
+
+    /**
+     * Sets the alphabet set of this DFA.
+     *
+     * @param alphabetSet new alphabet set
+     */
+    public void setAlphabetSet(Set<String> alphabetSet) {
+        this.alphabetSet = new HashSet<>(alphabetSet);
+    }
+
+    /**
+     * Returns all nodes in this DFA.
+     *
+     * @return list of nodes
+     */
+    public List<DFANode> getNodeList() {
+        return new ArrayList<>(nodeList);
+    }
+
+    /**
+     * Returns all edges in this DFA.
+     *
+     * @return list of edges
+     */
+    public List<DFAEdge> getEdgeList() {
+        return new ArrayList<>(edgeList);
+    }
+
+    /**
+     * Returns current node of this DFA.
+     *
+     * @return reference of current node of DFA.
+     */
+    public DFANode getCurrentNode() {
+        return currentNode;
+    }
+
+    /**
+     * Activates a new node and deactivates the original.
+     * NOTE:
+     *  if the new node is not in the node list, this operation will fail.
+     *
+     * @param currentNode new node to be activated.
+     * @return if this operation is successful.
+     */
+    public boolean setCurrentNode(DFANode currentNode) {
+        if (!nodeList.contains(currentNode)) return false;
+        if (this.currentNode != null) {
+            this.currentNode.setOnCurrentState(false);
+        }
+        this.currentNode = currentNode;
+        this.currentNode.setOnCurrentState(true);
+        return true;
+    }
+
+    /**
+     * Returns a reference to initial node of the DFA.
+     * Initial node is the starting node of every input.
+     *
+     * @return reference of initial node.
+     */
+    public DFANode getInitialNode() {
+        return initialNode;
+    }
+
+    /**
+     * Sets initial node of DFA.
+     *
+     * @param initialNode new initial node.
+     */
+    public void setInitialNode(DFANode initialNode) {
+        this.initialNode = initialNode;
+    }
 
     public DFAController() {
         this.edgeList = new ArrayList<>();
@@ -42,8 +114,9 @@ public class DFAController {
 
     /**
      * Shallowly clones the current DFA (Node will be references.)
-     * NOTE: the new DFA will be blank, which had not experienced any transitions
      *
+     * @implNote the new DFA will be at the initial state
+     *  which had not experienced any transitions
      * @return shallow copy of the current DFA object.
      */
     public DFAController cloneDFA() {
@@ -135,6 +208,7 @@ public class DFAController {
      * @param edge edge to be deleted
      */
     public void removeEdge(DFAEdge edge) {
+        assert edge != null;
         edgeList.remove(edge);
         // update the corresponding node
         notifyEdgeTail(edge);
@@ -148,18 +222,16 @@ public class DFAController {
      * @param node node to be deleted
      */
     public void removeNode(DFANode node) {
-        // TODO: remove node function
+        assert node != null;
         nodeList.remove(node);
 
         if (node == currentNode) {
             currentNode = initialNode;
             initialNode.setOnCurrentState(true);
         }
-    }
 
-    public void validate() throws DFAValidationException {
-        // TODO: validate function
-        // Maybe we can move this function to a separate "validator"
+        // remove relevant edges
+        edgeList.removeIf((DFAEdge e) -> e.getTail() == currentNode || e.getHead() == currentNode);
     }
 
     /**
