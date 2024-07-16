@@ -7,6 +7,8 @@ import io.github.lmhjava.engine.node.DFANode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 // Test for DFA Controller
@@ -79,6 +81,26 @@ public class DFAControllerTest {
         assertEquals(2, testEdge.getAlphabet().size());
         // Check the tail node.
         assertTrue(testNode1.getEdges().contains(testEdge));
+    }
+
+    // Test addEdge with duplicate keys
+    @Test
+    public void testAddEdgeDuplicateKeys() {
+        initDFA();
+        // Try to add an edge to testNode1 with duplicate keys with the original edge.
+        DFAEdge newEdge = new DFAEdge(testNode1, testNode2);
+        controller.registerAlphabet("A");
+        controller.registerAlphabet("B");
+        controller.registerAlphabet("C");
+        newEdge.addAllAlphabet(Set.of("A", "B", "C"));
+        assertFalse(controller.addEdge(newEdge));
+        assertEquals(1, controller.getEdgeSet().size());
+        controller.removeEdge(newEdge);
+
+        newEdge.setAlphabet(Set.of("B", "C"));
+        assertTrue(controller.addEdge(newEdge));
+        // Since the new alphabet will be merged, there will only be one edge
+        assertEquals(1, controller.getEdgeSet().size());
     }
 
     // Test addNode

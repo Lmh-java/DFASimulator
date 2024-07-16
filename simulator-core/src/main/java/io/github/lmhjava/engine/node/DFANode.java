@@ -3,15 +3,20 @@ package io.github.lmhjava.engine.node;
 import io.github.lmhjava.engine.edge.DFAEdge;
 import io.github.lmhjava.engine.exception.NextNodeUndefException;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+/**
+ * A node in a DFA graph.
+ */
 public class DFANode {
     // edges store all the edges that starts from the current node
     // e.g. DFAEdges which getTail() == this.
-    private List<DFAEdge> edges;
+    private Set<DFAEdge> edges;
+    // local alphabet of the node, meaning which alphabets are allowed in this node.
+    private final Set<String> alphabet;
     // cache for quick lookup transitions by inputs
     private final Map<String, DFAEdge> cache;
     // is current node selected
@@ -20,16 +25,22 @@ public class DFANode {
     private String content;
 
     public DFANode() {
-        this.edges = new ArrayList<>();
+        this.edges = new HashSet<>();
         this.cache = new HashMap<>();
+        this.alphabet = new HashSet<>();
         this.onCurrentState = false;
     }
 
     public DFANode(String content) {
-        this.edges = new ArrayList<>();
+        this.edges = new HashSet<>();
         this.cache = new HashMap<>();
+        this.alphabet = new HashSet<>();
         this.onCurrentState = false;
         this.content = content;
+    }
+
+    public Set<String> getAlphabet() {
+        return alphabet;
     }
 
     public String getContent() {
@@ -40,14 +51,17 @@ public class DFANode {
         this.content = content;
     }
 
-    public List<DFAEdge> getEdges() {
+    public Set<DFAEdge> getEdges() {
         return edges;
     }
 
-    public void setEdges(List<DFAEdge> edges) {
+    public void setEdges(Set<DFAEdge> edges) {
         this.edges = edges;
         // clear all caches since the edges are updated
         this.cache.clear();
+        // update the alphabet set of the node
+        this.alphabet.clear();
+        edges.forEach((DFAEdge e) -> this.alphabet.addAll(e.getAlphabet()));
     }
 
     public boolean isOnCurrentState() {
@@ -59,7 +73,8 @@ public class DFANode {
     }
 
     /**
-     * Return the next node that DFA will get to, given the input.
+     * Returns the next node that DFA will get to, given the input.
+     *
      * @param input input
      * @return next node
      * @throws NextNodeUndefException if next node is undefined

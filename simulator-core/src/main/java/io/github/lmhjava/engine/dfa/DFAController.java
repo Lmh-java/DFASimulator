@@ -9,6 +9,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Main controller of a DFA.
+ * Each DFA has a corresponding controller.
+ */
 public class DFAController {
     private final Set<DFAEdge> edgeSet;
     private final Set<DFANode> nodeSet;
@@ -134,10 +138,11 @@ public class DFAController {
      *             2. if newly-added edge contains alphabet which is not in the alphabet set of
      *             the DFA, this operation will be rejected.
      *             3. if any end of edge contains a non-existing node, this operation will be rejected.
+     *             4. if the new edge contains already-registered alphabet in the node (e.g. other edge
+     *             occupies the alphabet), this operation will be rejected.
      * @return whether successfully added or not.
      */
     public boolean addEdge(DFAEdge edge) {
-        // TODO: complete checks for duplicate transitions (duplicate trigger alphabet)
         assert edge != null;
         // check preconditions
         if (edge.getTail() == null || edge.getAlphabet() == null || edge.getHead() == null) return false;
@@ -145,6 +150,10 @@ public class DFAController {
         if (!nodeSet.contains(edge.getTail()) || !nodeSet.contains(edge.getHead())) return false;
         // check if the new alphabet is a subset of the general alphabet set
         if (!alphabetSet.containsAll(edge.getAlphabet())) return false;
+        // check if the new alphabet is already contained in some other edges starting from the node
+        for (String a : edge.getAlphabet()) {
+            if (edge.getTail().getAlphabet().contains(a)) return false;
+        }
         // is the newly added edge merged with other pre-existing edges?
         boolean isMergedWithOthers = false;
         for (DFAEdge e : edgeSet) {
@@ -169,7 +178,7 @@ public class DFAController {
      * @param edge relevant edge
      */
     private void notifyEdgeTail(DFAEdge edge) {
-        List<DFAEdge> relevantEdges = new ArrayList<>();
+        final Set<DFAEdge> relevantEdges = new HashSet<>();
         edgeSet.forEach((DFAEdge e) -> {
             if (e.getTail() == edge.getTail()) relevantEdges.add(e);
         });
@@ -260,7 +269,7 @@ public class DFAController {
                 currentNode = initialNode;
             }
         }
-        DFANode nextNode = peek(input);
+        final DFANode nextNode = peek(input);
         currentNode.setOnCurrentState(false);
         nextNode.setOnCurrentState(true);
         currentNode = nextNode;
