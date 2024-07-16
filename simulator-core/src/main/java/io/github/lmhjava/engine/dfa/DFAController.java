@@ -10,11 +10,25 @@ import java.util.List;
 import java.util.Set;
 
 public class DFAController {
-    private final List<DFAEdge> edgeList;
-    private final List<DFANode> nodeList;
+    private final Set<DFAEdge> edgeSet;
+    private final Set<DFANode> nodeSet;
     private DFANode currentNode;
     private DFANode initialNode;
     private Set<String> alphabetSet;
+
+    public DFAController() {
+        this.edgeSet = new HashSet<>();
+        this.nodeSet = new HashSet<>();
+        this.alphabetSet = new HashSet<>();
+    }
+
+    public DFAController(Set<DFAEdge> edgeSet, Set<DFANode> nodeSet,
+                         Set<String> alphabetSet, DFANode initialNode) {
+        this.edgeSet = new HashSet<>(edgeSet);
+        this.nodeSet = new HashSet<>(nodeSet);
+        this.alphabetSet = new HashSet<>(alphabetSet);
+        this.initialNode = initialNode;
+    }
 
     /**
      * Returns the general alphabet set of this DFA.
@@ -39,8 +53,8 @@ public class DFAController {
      *
      * @return list of nodes
      */
-    public List<DFANode> getNodeList() {
-        return new ArrayList<>(nodeList);
+    public List<DFANode> getNodeSet() {
+        return new ArrayList<>(nodeSet);
     }
 
     /**
@@ -48,8 +62,8 @@ public class DFAController {
      *
      * @return list of edges
      */
-    public List<DFAEdge> getEdgeList() {
-        return new ArrayList<>(edgeList);
+    public List<DFAEdge> getEdgeSet() {
+        return new ArrayList<>(edgeSet);
     }
 
     /**
@@ -70,7 +84,7 @@ public class DFAController {
      * @return if this operation is successful.
      */
     public boolean setCurrentNode(DFANode currentNode) {
-        if (!nodeList.contains(currentNode)) return false;
+        if (currentNode == null || !nodeSet.contains(currentNode)) return false;
         if (this.currentNode != null) {
             this.currentNode.setOnCurrentState(false);
         }
@@ -95,20 +109,7 @@ public class DFAController {
      * @param initialNode new initial node.
      */
     public void setInitialNode(DFANode initialNode) {
-        this.initialNode = initialNode;
-    }
-
-    public DFAController() {
-        this.edgeList = new ArrayList<>();
-        this.nodeList = new ArrayList<>();
-        this.alphabetSet = new HashSet<>();
-    }
-
-    public DFAController(List<DFAEdge> edgeList, List<DFANode> nodeList,
-                         Set<String> alphabetSet, DFANode initialNode) {
-        this.edgeList = new ArrayList<>(edgeList);
-        this.nodeList = new ArrayList<>(nodeList);
-        this.alphabetSet = new HashSet<>(alphabetSet);
+        assert nodeSet.contains(initialNode);
         this.initialNode = initialNode;
     }
 
@@ -120,7 +121,7 @@ public class DFAController {
      * @return shallow copy of the current DFA object.
      */
     public DFAController cloneDFA() {
-        return new DFAController(this.edgeList, this.nodeList, this.alphabetSet, this.initialNode);
+        return new DFAController(this.edgeSet, this.nodeSet, this.alphabetSet, this.initialNode);
     }
 
     /**
@@ -141,12 +142,12 @@ public class DFAController {
         // check preconditions
         if (edge.getTail() == null || edge.getAlphabet() == null || edge.getHead() == null) return false;
         // check if the node exists
-        if (!nodeList.contains(edge.getTail()) || !nodeList.contains(edge.getHead())) return false;
+        if (!nodeSet.contains(edge.getTail()) || !nodeSet.contains(edge.getHead())) return false;
         // check if the new alphabet is a subset of the general alphabet set
         if (!alphabetSet.containsAll(edge.getAlphabet())) return false;
         // is the newly added edge merged with other pre-existing edges?
         boolean isMergedWithOthers = false;
-        for (DFAEdge e : edgeList) {
+        for (DFAEdge e : edgeSet) {
             if (e.getHead() == edge.getHead() && e.getTail() == edge.getTail()) {
                 e.addAllAlphabet(edge.getAlphabet());
                 isMergedWithOthers = true;
@@ -154,7 +155,7 @@ public class DFAController {
             }
         }
         if (!isMergedWithOthers) {
-            edgeList.add(edge);
+            edgeSet.add(edge);
         }
         // update the relevant tail nodes to make sure they are also updated.
         notifyEdgeTail(edge);
@@ -169,7 +170,7 @@ public class DFAController {
      */
     private void notifyEdgeTail(DFAEdge edge) {
         List<DFAEdge> relevantEdges = new ArrayList<>();
-        edgeList.forEach((DFAEdge e) -> {
+        edgeSet.forEach((DFAEdge e) -> {
             if (e.getTail() == edge.getTail()) relevantEdges.add(e);
         });
         edge.getTail().setEdges(relevantEdges);
@@ -183,7 +184,7 @@ public class DFAController {
      */
     public boolean addNode(DFANode node) {
         if (node == null) return false;
-        nodeList.add(node);
+        nodeSet.add(node);
         return true;
     }
 
@@ -193,7 +194,7 @@ public class DFAController {
      * @param alphabet new string
      * @return whether successfully added
      */
-    public boolean addAlphabet(String alphabet) {
+    public boolean registerAlphabet(String alphabet) {
         assert alphabet != null;
         if (alphabetSet.contains(alphabet)) {
             return false;
@@ -210,40 +211,55 @@ public class DFAController {
      */
     public void removeEdge(DFAEdge edge) {
         assert edge != null;
-        edgeList.remove(edge);
+        edgeSet.remove(edge);
         // update the corresponding node
         notifyEdgeTail(edge);
     }
 
     /**
      * Remove the given node from DFA and breaks all relevant edges.
-     * NOTE: if the node being deleted is the current node the DFA is on,
+     * NOTE: If the node being deleted is the current node the DFA is on,
      *      the DFA will be reset to the initial node.
+     *      If the node being deleted is the initial node, the initial node
+     *      will be reset to null. (This helps GC to collect unused pointers)
      *
      * @param node node to be deleted
      */
     public void removeNode(DFANode node) {
         assert node != null;
-        nodeList.remove(node);
+        nodeSet.remove(node);
 
         if (node == currentNode) {
             currentNode = initialNode;
             initialNode.setOnCurrentState(true);
         }
 
+        if (node == initialNode) {
+            initialNode = null;
+        }
+
         // remove relevant edges
-        edgeList.removeIf((DFAEdge e) -> e.getTail() == currentNode || e.getHead() == currentNode);
+        edgeSet.removeIf((DFAEdge e) -> e.getTail() == node || e.getHead() == node);
     }
 
     /**
      * Forward DFA to the next state according to the input.
      *
      * @param input input that triggers the transition
+     * @implNote If current node is {@code null}, DFA will look for the initial node.
+     *          If initial node is also {@code null}, throw {@code NextNodeUndefException}.
      * @return next DFA node AFTER transition
      * @throws NextNodeUndefException if the next node is undefined
      */
     public DFANode next(String input) throws NextNodeUndefException {
         assert input != null;
+        if (currentNode == null) {
+            if (initialNode == null) {
+                throw new NextNodeUndefException(null, input);
+            } else {
+                currentNode = initialNode;
+            }
+        }
         DFANode nextNode = peek(input);
         currentNode.setOnCurrentState(false);
         nextNode.setOnCurrentState(true);
@@ -255,11 +271,21 @@ public class DFAController {
      * Returns the next node after a transition with given input, WITHOUT actually perform the transition.
      *
      * @param input input that triggers the transition
+     * @implNote If current node is {@code null}, DFA will look for the initial node.
+     *          If initial node is also {@code null}, throw {@code NextNodeUndefException}.
+     *          PS: Unlike {@link  DFAController#next(String)}, peek will not modify any properties of DFA.
      * @return next DFA node AFTER transition
      * @throws NextNodeUndefException if the next node is undefined
      */
     public DFANode peek(String input) throws NextNodeUndefException {
         assert input != null;
+        if (currentNode == null) {
+            if (initialNode == null) {
+                throw new NextNodeUndefException(null, input);
+            } else {
+                return initialNode.getNextNode(input);
+            }
+        }
         return currentNode.getNextNode(input);
     }
 
