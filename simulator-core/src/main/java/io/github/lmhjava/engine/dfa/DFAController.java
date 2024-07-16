@@ -142,7 +142,7 @@ public class DFAController {
      *             occupies the alphabet), this operation will be rejected.
      * @return whether successfully added or not.
      */
-    public boolean addEdge(DFAEdge edge) {
+    public boolean registerEdge(DFAEdge edge) {
         assert edge != null;
         // check preconditions
         if (edge.getTail() == null || edge.getAlphabet() == null || edge.getHead() == null) return false;
@@ -186,12 +186,12 @@ public class DFAController {
     }
 
     /**
-     * Add a node to the DFA.
+     * Register a node to the DFA.
      *
      * @param node new node
      * @return successfully added or not.
      */
-    public boolean addNode(DFANode node) {
+    public boolean registerNode(DFANode node) {
         if (node == null) return false;
         nodeSet.add(node);
         return true;
@@ -211,6 +211,16 @@ public class DFAController {
             alphabetSet.add(alphabet);
             return true;
         }
+    }
+
+    /**
+     * Add a new set of strings to the general alphabet set of the DFA.
+     *
+     * @param alphabetSet new alphabet set
+     */
+    public void registerAlphabet(Set<String> alphabetSet) {
+        assert alphabetSet != null;
+        this.alphabetSet.addAll(alphabetSet);
     }
 
     /**

@@ -21,6 +21,13 @@ public class DFAEdge {
         this.alphabet = new HashSet<>();
     }
 
+    public DFAEdge(DFANode tail, DFANode head, String alphabet) {
+        this.tail = tail;
+        this.head = head;
+        this.alphabet = new HashSet<>();
+        this.alphabet.add(alphabet);
+    }
+
     public DFANode getHead() {
         return head;
     }

@@ -31,9 +31,9 @@ public class DFAControllerTest {
 
     private void initDFA() {
         controller.registerAlphabet("A");
-        controller.addNode(testNode1);
-        controller.addNode(testNode2);
-        controller.addEdge(testEdge);
+        controller.registerNode(testNode1);
+        controller.registerNode(testNode2);
+        controller.registerEdge(testEdge);
     }
 
     // Test constructor
@@ -46,24 +46,24 @@ public class DFAControllerTest {
         assertNull(controller.getInitialNode());
     }
 
-    // Test addEdge
+    // Test registerEdge
     @Test
-    public void testAddEdge() {
-        assertThrows(AssertionError.class, () -> controller.addEdge(null));
+    public void testRegisterEdge() {
+        assertThrows(AssertionError.class, () -> controller.registerEdge(null));
         // Rejected, head and tail node do not exist.
-        assertFalse(controller.addEdge(testEdge));
-        controller.addNode(testNode1);
+        assertFalse(controller.registerEdge(testEdge));
+        controller.registerNode(testNode1);
 
         // Rejected, head node does not exist.
-        assertFalse(controller.addEdge(testEdge));
-        controller.addNode(testNode2);
+        assertFalse(controller.registerEdge(testEdge));
+        controller.registerNode(testNode2);
 
         // Rejected, alphabet is not registered into the DFA.
-        assertFalse(controller.addEdge(testEdge));
+        assertFalse(controller.registerEdge(testEdge));
         controller.registerAlphabet("A");
 
         // Accepted
-        assertTrue(controller.addEdge(testEdge));
+        assertTrue(controller.registerEdge(testEdge));
         assertTrue(controller.getEdgeSet().contains(testEdge));
         // Check the tail node.
         assertTrue(testNode1.getEdges().contains(testEdge));
@@ -72,20 +72,20 @@ public class DFAControllerTest {
         DFAEdge newEdge = new DFAEdge(testNode1, testNode2);
         newEdge.addAlphabet("B");
         // Rejected, alphabet is not registered into the DFA.
-        assertFalse(controller.addEdge(newEdge));
+        assertFalse(controller.registerEdge(newEdge));
         controller.registerAlphabet("B");
 
         // Accepted and Merged
-        assertTrue(controller.addEdge(newEdge));
+        assertTrue(controller.registerEdge(newEdge));
         assertFalse(controller.getEdgeSet().contains(newEdge));
         assertEquals(2, testEdge.getAlphabet().size());
         // Check the tail node.
         assertTrue(testNode1.getEdges().contains(testEdge));
     }
 
-    // Test addEdge with duplicate keys
+    // Test registerEdge with duplicate keys
     @Test
-    public void testAddEdgeDuplicateKeys() {
+    public void testRegisterEdgeDuplicateKeys() {
         initDFA();
         // Try to add an edge to testNode1 with duplicate keys with the original edge.
         DFAEdge newEdge = new DFAEdge(testNode1, testNode2);
@@ -93,21 +93,21 @@ public class DFAControllerTest {
         controller.registerAlphabet("B");
         controller.registerAlphabet("C");
         newEdge.addAllAlphabet(Set.of("A", "B", "C"));
-        assertFalse(controller.addEdge(newEdge));
+        assertFalse(controller.registerEdge(newEdge));
         assertEquals(1, controller.getEdgeSet().size());
         controller.removeEdge(newEdge);
 
         newEdge.setAlphabet(Set.of("B", "C"));
-        assertTrue(controller.addEdge(newEdge));
+        assertTrue(controller.registerEdge(newEdge));
         // Since the new alphabet will be merged, there will only be one edge
         assertEquals(1, controller.getEdgeSet().size());
     }
 
     // Test addNode
     @Test
-    public void testAddNode() {
-        assertFalse(controller.addNode(null));
-        assertTrue(controller.addNode(testNode1));
+    public void testRegisterNode() {
+        assertFalse(controller.registerNode(null));
+        assertTrue(controller.registerNode(testNode1));
         assertTrue(controller.getNodeSet().contains(testNode1));
     }
 
@@ -176,7 +176,7 @@ public class DFAControllerTest {
         DFAEdge newEdge = new DFAEdge(testNode2, testNode1);
         newEdge.addAlphabet("B");
         controller.registerAlphabet("B");
-        controller.addEdge(newEdge);
+        controller.registerEdge(newEdge);
 
         assertThrows(NextNodeUndefException.class, () -> controller.next("A"));
         assertEquals(testNode1, controller.next("B"));
@@ -201,7 +201,7 @@ public class DFAControllerTest {
         DFAEdge newEdge = new DFAEdge(testNode2, testNode1);
         newEdge.addAlphabet("B");
         controller.registerAlphabet("B");
-        controller.addEdge(newEdge);
+        controller.registerEdge(newEdge);
 
         assertEquals(testNode2, controller.peek("A"));
         assertThrows(NextNodeUndefException.class, () -> controller.peek("B"));
