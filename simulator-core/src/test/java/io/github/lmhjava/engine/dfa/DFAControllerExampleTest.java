@@ -69,6 +69,7 @@ public class DFAControllerExampleTest {
         assertEquals(node2, controller.next("f"));
     }
 
+    // A - (a) -> A
     @Test
     public void testSelfLoop() throws NextNodeUndefException {
         DFANode node = new DFANode("A");
@@ -82,5 +83,36 @@ public class DFAControllerExampleTest {
         assertEquals(node, controller.next("a"));
         assertEquals(node, controller.next("a"));
         assertEquals(node, controller.next("a"));
+    }
+
+    // A - (a) -> B - (a) -> A
+    //   \
+    //     - (ELSE) -> A
+    @Test
+    public void testElseEdges() throws NextNodeUndefException {
+        DFANode node1 = new DFANode("A");
+        DFANode node2 = new DFANode("B");
+        DFAEdge edge1 = new DFAEdge(node1, node2, "a");
+        DFAEdge elseEdge = new DFAEdge(node1, node1);
+        elseEdge.setElseEdge(true);
+        DFAEdge edge2 = new DFAEdge(node2, node1, "a");
+        DFAController controller = new DFAController();
+        controller.registerAlphabet("a");
+        controller.registerAlphabet("b");
+        controller.registerAlphabet("c");
+        controller.registerNode(node1);
+        controller.registerNode(node2);
+        controller.setInitialNode(node1);
+        controller.registerEdge(edge1);
+        controller.registerEdge(edge2);
+        controller.registerEdge(elseEdge);
+
+        assertNull(controller.getCurrentNode());
+        for (int i = 0; i < 10; i++) {
+            assertEquals(node1, controller.next("b"));
+            assertEquals(node1, controller.next("c"));
+            assertEquals(node2, controller.next("a"));
+            assertEquals(node1, controller.next("a"));
+        }
     }
 }

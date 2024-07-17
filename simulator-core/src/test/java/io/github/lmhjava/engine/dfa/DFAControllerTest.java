@@ -147,6 +147,38 @@ public class DFAControllerTest {
         assertFalse(testNode1.getEdges().contains(testEdge));
     }
 
+    // Test removeEdge with else edge
+    @Test
+    public void testRemoveEdgeWithElse() {
+        initDFA();
+        DFAEdge elseEdge = new DFAEdge(testNode1, testNode2);
+        elseEdge.addAlphabet("a");
+        elseEdge.addAlphabet("b");
+        elseEdge.setElseEdge(true);
+        controller.registerAlphabet(Set.of("a", "b"));
+        controller.registerEdge(elseEdge);
+        assertEquals(2, controller.getEdgeSet().size());
+        assertEquals(elseEdge, testNode1.getElseEdge());
+
+        controller.removeEdge(testEdge);
+        assertEquals(1, controller.getEdgeSet().size());
+        assertEquals(elseEdge, testNode1.getElseEdge());
+    }
+
+    // Test remove else edge
+    @Test
+    public void testRemoveElseEdge() {
+        initDFA();
+        DFAEdge elseEdge = new DFAEdge(testNode1, testNode2);
+        elseEdge.setElseEdge(true);
+        controller.registerEdge(elseEdge);
+        assertEquals(2, controller.getEdgeSet().size());
+        assertEquals(elseEdge, testNode1.getElseEdge());
+        controller.removeEdge(elseEdge);
+        assertEquals(1, controller.getEdgeSet().size());
+        assertNull(testNode1.getElseEdge());
+    }
+
     // Test removeNode
     @Test
     public void testRemoveNode() {

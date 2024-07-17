@@ -14,6 +14,7 @@ public class DFAEdge {
     private DFANode tail;
     private DFANode head;
     private Set<String> alphabet;
+    private boolean isElseEdge;
 
     public DFAEdge(DFANode tail, DFANode head) {
         this.tail = tail;
@@ -26,6 +27,14 @@ public class DFAEdge {
         this.head = head;
         this.alphabet = new HashSet<>();
         this.alphabet.add(alphabet);
+    }
+
+    public boolean isElseEdge() {
+        return isElseEdge;
+    }
+
+    public void setElseEdge(boolean elseEdge) {
+        isElseEdge = elseEdge;
     }
 
     public DFANode getHead() {

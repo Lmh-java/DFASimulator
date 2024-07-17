@@ -15,6 +15,8 @@ public class DFANode {
     // edges store all the edges that starts from the current node
     // e.g. DFAEdges which getTail() == this.
     private Set<DFAEdge> edges;
+    // one node can only initiate one ELSE edge
+    private DFAEdge elseEdge;
     // local alphabet of the node, meaning which alphabets are allowed in this node.
     private final Set<String> alphabet;
     // cache for quick lookup transitions by inputs
@@ -55,13 +57,31 @@ public class DFANode {
         return edges;
     }
 
+    public DFAEdge getElseEdge() {
+        return elseEdge;
+    }
+
+    public void setElseEdge(DFAEdge elseEdge) {
+        this.elseEdge = elseEdge;
+    }
+
     public void setEdges(Set<DFAEdge> edges) {
+        // clear ELSE edge
+        this.elseEdge = null;
+        // update edges
         this.edges = edges;
         // clear all caches since the edges are updated
         this.cache.clear();
         // update the alphabet set of the node
         this.alphabet.clear();
-        edges.forEach((DFAEdge e) -> this.alphabet.addAll(e.getAlphabet()));
+        // re-compute the alphabet subset of this node
+        edges.forEach((DFAEdge e) -> {
+            if (e.isElseEdge()) {
+                this.elseEdge = e;
+            } else {
+                this.alphabet.addAll(e.getAlphabet());
+            }
+        });
     }
 
     public boolean isOnCurrentState() {
@@ -92,6 +112,8 @@ public class DFANode {
                     return edge.getHead();
                 }
             }
+            // check else edge
+            if (elseEdge != null) return elseEdge.getHead();
             // nothing found, throw an exception.
             throw new NextNodeUndefException(this, input);
         }

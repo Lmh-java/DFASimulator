@@ -155,18 +155,28 @@ public class DFAController {
             if (edge.getTail().getAlphabet().contains(a)) return false;
         }
         // is the newly added edge merged with other pre-existing edges?
-        boolean isMergedWithOthers = false;
-        for (DFAEdge e : edgeSet) {
-            if (e.getHead() == edge.getHead() && e.getTail() == edge.getTail()) {
-                e.addAllAlphabet(edge.getAlphabet());
-                isMergedWithOthers = true;
-                break;
+        if (edge.isElseEdge()) {
+            // the newly added edge is an ELSE edge, directly modify the node
+            if (edge.getTail().getElseEdge() != edge && edge.getHead().getElseEdge() != null) {
+                // remove the old else edge
+                edgeSet.remove(edge.getTail().getElseEdge());
+            }
+            // add the new else edge
+            edgeSet.add(edge);
+        } else {
+            boolean isMergedWithOthers = false;
+            for (DFAEdge e : edgeSet) {
+                if (e.getHead() == edge.getHead() && e.getTail() == edge.getTail()) {
+                    e.addAllAlphabet(edge.getAlphabet());
+                    isMergedWithOthers = true;
+                    break;
+                }
+            }
+            if (!isMergedWithOthers) {
+                edgeSet.add(edge);
             }
         }
-        if (!isMergedWithOthers) {
-            edgeSet.add(edge);
-        }
-        // update the relevant tail nodes to make sure they are also updated.
+        // update the relevant tail nodes to make sure they are also updated with the new edge info.
         notifyEdgeTail(edge);
         return true;
     }
