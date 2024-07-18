@@ -17,6 +17,9 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Dependency Versions -->
+    <flatlaf.version>3.5</flatlaf.version>
   </properties>
 
   <dependencies>
@@ -26,5 +29,26 @@
       <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- FlatLaf look and feel  -->
+    <dependency>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf</artifactId>
+      <version>${flatlaf.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf-intellij-themes</artifactId>
+      <version>${flatlaf.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.github.lmh-java</groupId>
+      <artifactId>simulator-core</artifactId>
+      <version>${dfa-simulator.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 </project>

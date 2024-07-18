@@ -6,7 +6,7 @@
 
   <groupId>io.github.lmh-java</groupId>
   <artifactId>simulator-parent</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>${dfa-simulator.version}</version>
   <packaging>pom</packaging>
   <description>A state-of-art simulator for users to create, validate, test DFAs.</description>
   <name>DFASimulator</name>
@@ -32,6 +32,9 @@
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.deploy.skip>false</maven.deploy.skip>
+
+    <!-- Current DFA Simulator Version -->
+    <dfa-simulator.version>1.0-SNAPSHOT</dfa-simulator.version>
 
     <!-- Dependency Versions -->
     <junit.version>5.8.2</junit.version>
