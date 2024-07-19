@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.control.ScrollPane?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="io.github.lmhjava.ui.controller.CanvasController"
+            prefHeight="400" prefWidth="400">
+  <ScrollPane fx:id="scrollPane"
+              AnchorPane.topAnchor="0.0"
+              AnchorPane.bottomAnchor="0.0"
+              AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0"
+              pannable="true">
+    <Pane fx:id="canvasPane" style="-fx-background-color: yellow; -fx-opacity: 0.4"/>
+  </ScrollPane>
+</AnchorPane>
