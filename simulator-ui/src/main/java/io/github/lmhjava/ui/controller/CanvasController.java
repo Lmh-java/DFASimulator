@@ -8,6 +8,7 @@ import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -62,9 +63,9 @@ public class CanvasController {
                 canvasPane.getChildren().remove(c.getElementRemoved());
             }
             // update the canvas and zoom to the center
-            scrollPane.layout();
-            scrollPane.setHvalue(0.5);
-            scrollPane.setVvalue(0.5);
+//            scrollPane.layout();
+//            scrollPane.setHvalue(0.5);
+//            scrollPane.setVvalue(0.5);
         });
 
         initZoomFunction();
@@ -105,7 +106,7 @@ public class CanvasController {
     /**
      * Initialize zoom function of the canvas pane.
      *
-     * @implNote User can pinch or scroll to zoom the canvas. Zooming is always around the center of the canvas.
+     * @implNote User can pinch or scroll to zoom the canvas. Zooming is always pivot to the center of the canvas.
      * @link <a href="https://makemeengr.com/javafx-8-zooming-relative-to-mouse-pointer/#google_vignette">Reference</a>
      */
     private void initZoomFunction() {
@@ -123,14 +124,9 @@ public class CanvasController {
             final double newCenterX = centerPosX * e.getZoomFactor();
             final double newCenterY = centerPosY * e.getZoomFactor();
 
-            final double denoX = contentSize.getWidth() * e.getZoomFactor() - viewPort.getWidth();
-            final double denoY = contentSize.getHeight() * e.getZoomFactor() - viewPort.getHeight();
-            if (denoX >= SCROLL_THRESHOLD) {
-                scrollPane.setHvalue((newCenterX - viewPort.getWidth() / 2) / denoX);
-            }
-            if (denoY >= SCROLL_THRESHOLD) {
-                scrollPane.setVvalue((newCenterY - viewPort.getHeight() / 2) / denoY);
-            }
+            scrollPane.setHvalue((newCenterX - viewPort.getWidth() / 2) / (contentSize.getWidth() * e.getZoomFactor() - viewPort.getWidth()));
+            scrollPane.setVvalue((newCenterY - viewPort.getHeight() / 2) / (contentSize.getHeight() * e.getZoomFactor() - viewPort.getHeight()));
+
         });
     }
 
