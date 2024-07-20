@@ -15,4 +15,14 @@ public class DFAEdgeComponent extends CanvasComponent {
     private ObjectProperty<DFANodeComponent> headNode;
 
     private NumberExpression startX;
+
+    @Override
+    public void notifySelected() {
+
+    }
+
+    @Override
+    public void notifyUnselected() {
+
+    }
 }

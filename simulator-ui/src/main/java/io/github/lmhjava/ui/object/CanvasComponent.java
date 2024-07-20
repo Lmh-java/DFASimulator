@@ -2,7 +2,7 @@ package io.github.lmhjava.ui.object;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.scene.Node;
+import javafx.scene.layout.Region;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 
-public abstract class CanvasComponent extends Node {
+public abstract class CanvasComponent extends Region implements Selectable {
     protected IntegerProperty xProperty;
     protected IntegerProperty yProperty;
 
@@ -20,6 +20,8 @@ public abstract class CanvasComponent extends Node {
         this.xProperty = new SimpleIntegerProperty(x);
         this.yProperty = new SimpleIntegerProperty(y);
         setPosition(x, y);
+        super.layoutXProperty().bind(xProperty);
+        super.layoutYProperty().bind(yProperty);
     }
 
     public CanvasComponent() {
@@ -31,4 +33,13 @@ public abstract class CanvasComponent extends Node {
         this.yProperty.set(y);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public abstract void notifySelected();
+
+    /**
+     * {@inheritDoc}
+     */
+    public abstract void notifyUnselected();
 }
