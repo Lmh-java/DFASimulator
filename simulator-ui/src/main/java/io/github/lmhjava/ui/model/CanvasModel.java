@@ -1,10 +1,7 @@
 package io.github.lmhjava.ui.model;
 
 import io.github.lmhjava.ui.object.CanvasComponent;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import lombok.Getter;
@@ -19,6 +16,8 @@ public class CanvasModel {
 
     private final IntegerProperty contextMenuX = new SimpleIntegerProperty(0);
     private final IntegerProperty contextMenuY = new SimpleIntegerProperty(0);
+
+    private final DoubleProperty scale = new SimpleDoubleProperty(1.0);
 
     public CanvasComponent getSelectedComponent() {
         return selectedComponent.get();

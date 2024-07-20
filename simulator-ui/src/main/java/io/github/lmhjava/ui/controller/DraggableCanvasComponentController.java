@@ -1,5 +1,6 @@
 package io.github.lmhjava.ui.controller;
 
+import io.github.lmhjava.ui.model.CanvasModel;
 import io.github.lmhjava.ui.object.CanvasComponent;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -21,16 +22,18 @@ public class DraggableCanvasComponentController {
     private final int INACTIVE = 0;
     private int cycleStatus = INACTIVE;
     private BooleanProperty isDraggable;
+    private final CanvasModel canvasModel;
 
-    public DraggableCanvasComponentController(CanvasComponent target) {
-        this(target, false);
+    public DraggableCanvasComponentController(CanvasComponent target, CanvasModel canvasModel) {
+        this(target, false, canvasModel);
     }
 
-    public DraggableCanvasComponentController(CanvasComponent target, boolean isDraggable) {
+    public DraggableCanvasComponentController(CanvasComponent target, boolean isDraggable, CanvasModel canvasModel) {
         this.target = target;
         createHandlers();
         createDraggableProperty();
         this.isDraggable.set(isDraggable);
+        this.canvasModel = canvasModel;
     }
 
     private void createHandlers() {
@@ -48,8 +51,8 @@ public class DraggableCanvasComponentController {
         };
         updatePositionOnDrag = event -> {
             if (cycleStatus != INACTIVE) {
-                target.setTranslateX(event.getSceneX() - anchorX);
-                target.setTranslateY(event.getSceneY() - anchorY);
+                target.setTranslateX((event.getSceneX() - anchorX) / canvasModel.getScale().get());
+                target.setTranslateY((event.getSceneY() - anchorY) / canvasModel.getScale().get());
             }
         };
         commitPositionOnRelease = event -> {

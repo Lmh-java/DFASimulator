@@ -8,7 +8,6 @@ import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
-import javafx.geometry.Point2D;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -54,6 +53,10 @@ public class CanvasController {
         this.canvasModel.setCurrentSelection(null);
         canvasModel.getComponents().forEach((component) -> canvasPane.getChildren().add(component));
 
+        // bind the scale factor
+        this.canvasModel.getScale().bindBidirectional(canvasPane.scaleXProperty());
+        this.canvasModel.getScale().bindBidirectional(canvasPane.scaleYProperty());
+
         // TODO: sync the actual displayed shapes with data models
         this.canvasModel.getComponents().addListener((SetChangeListener.Change<? extends CanvasComponent> c) -> {
             log.debug("Components in canvas model is changed, syncing to render");
@@ -62,10 +65,6 @@ public class CanvasController {
             } else if (c.wasRemoved()) {
                 canvasPane.getChildren().remove(c.getElementRemoved());
             }
-            // update the canvas and zoom to the center
-//            scrollPane.layout();
-//            scrollPane.setHvalue(0.5);
-//            scrollPane.setVvalue(0.5);
         });
 
         initZoomFunction();
@@ -144,7 +143,7 @@ public class CanvasController {
             event.consume();
         });
         // make the node draggable
-        DraggableCanvasComponentController draggable = new DraggableCanvasComponentController(node, true);
+        DraggableCanvasComponentController draggable = new DraggableCanvasComponentController(node, true, canvasModel);
         draggable.createDraggableProperty();
         canvasModel.getComponents().add(node);
         log.debug("Add a node at [x = {}, y = {}]", x, y);
