@@ -2,19 +2,21 @@ package io.github.lmhjava.ui.object;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
 
 /**
  * Components that can be rendered on the canvas.
  */
-@Data
+@Getter
 @EqualsAndHashCode(callSuper = true)
-
 public abstract class CanvasComponent extends Region implements Selectable {
-    protected IntegerProperty xProperty;
-    protected IntegerProperty yProperty;
+    protected final IntegerProperty xProperty;
+    protected final IntegerProperty yProperty;
 
     public CanvasComponent(int x, int y) {
         this.xProperty = new SimpleIntegerProperty(x);

@@ -33,28 +33,32 @@ public class DFANodeComponent extends CanvasComponent {
         super(x, y);
         node = new DFANode("Default");
         pane = new StackPane();
-
         circle = new Circle();
+        selectionCircle = new Circle();
+        label = new Label();
+
+        initShape();
+    }
+
+    private void initShape() {
         circle.setRadius(NODE_CIRCLE_RADIUS);
         circle.setStroke(NODE_CIRCLE_STROKE);
         circle.setStrokeWidth(NODE_CIRCLE_STROKE_WIDTH);
 
-        selectionCircle = new Circle();
         selectionCircle.setRadius(NODE_CIRCLE_RADIUS + SELECTION_CIRCLE_THICKNESS);
         selectionCircle.setFill(null);
         selectionCircle.setStroke(NODE_CIRCLE_STROKE);
         selectionCircle.setStrokeWidth(SELECTION_CIRCLE_STROKE_WIDTH);
         selectionCircle.setVisible(false);
 
-        label = new Label();
         label.setText(this.node.getContent());
         label.setStyle("-fx-text-fill: white;");
 
-        // FIXME: the cursor style is not changed on Mac (Not tested on other platforms)
-        this.setCursor(Cursor.MOVE);
-
         pane.getChildren().addAll(circle, selectionCircle, label);
         super.getChildren().add(pane);
+
+        // FIXME: the cursor style is not changed on Mac (Not tested on other platforms)
+        this.setCursor(Cursor.MOVE);
     }
 
     /**

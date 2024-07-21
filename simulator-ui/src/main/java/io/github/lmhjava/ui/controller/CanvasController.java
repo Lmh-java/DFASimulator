@@ -8,12 +8,8 @@ import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,8 +18,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class CanvasController {
-
-    private static final double SCROLL_THRESHOLD = 0.05;
 
     @FXML
     private ScrollPane scrollPane;
@@ -38,6 +32,8 @@ public class CanvasController {
      * canvas data model
      */
     private CanvasModel canvasModel;
+
+    private ContextMenu contextMenu;
 
     /**
      * Initialize the data model and the controller
@@ -68,36 +64,61 @@ public class CanvasController {
         });
 
         initZoomFunction();
-        initContextMenu();
+        initDefaultContextMenu();
+        initMouseListeners();
+        initKeyboardListeners();
     }
 
     /**
-     * Initialize a context menu.
+     * Initialize a default context menu. A default context menu opens when right-clicking the blank canvas area.
      *
-     * @implNote open a context menu when right-clicked, and close it by left-clicking elsewhere.
+     * @implNote open a context menu when right-clicked canvas, and close it by left-clicking elsewhere.
      */
-    private void initContextMenu() {
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem menuItem = new MenuItem("Add Node");
-        menuItem.setOnAction((ActionEvent event) ->
+    private void initDefaultContextMenu() {
+        contextMenu = new ContextMenu();
+        MenuItem addNodeItem = new MenuItem("Add Node");
+        addNodeItem.setOnAction((ActionEvent event) ->
                 addNode(canvasModel.getContextMenuX().get(), canvasModel.getContextMenuY().get()));
-        contextMenu.getItems().add(menuItem);
 
         canvasPane.setOnContextMenuRequested((ContextMenuEvent event) -> {
-            log.debug("ContextMenu requested at [x={}, y={}]", event.getX(), event.getY());
+            log.debug("Default contextMenu requested at [x={}, y={}]", event.getX(), event.getY());
             canvasModel.getContextMenuX().setValue(event.getX());
             canvasModel.getContextMenuY().setValue(event.getY());
             contextMenu.show(canvasPane.getParent(), event.getScreenX(), event.getScreenY());
             event.consume();
         });
 
+        contextMenu.getItems().add(addNodeItem);
+    }
+
+    /**
+     * Initialize mouse event listeners and handlers
+     */
+    private void initMouseListeners() {
         canvasPane.setOnMouseClicked((MouseEvent event) -> {
             if (contextMenu.isShowing() && event.getButton() != MouseButton.SECONDARY) {
                 contextMenu.hide();
+                event.consume();
             }
             // reset selection when click else where
             if (event.getButton() == MouseButton.PRIMARY) {
                 canvasModel.setCurrentSelection(null);
+                event.consume();
+            }
+        });
+    }
+
+    /**
+     * Initialize all keyboard listeners
+     */
+    private void initKeyboardListeners() {
+        scrollPane.setOnKeyPressed((KeyEvent event) -> {
+            log.debug("Keyboard Event ({}) detected", event.getCode());
+            // delete a component
+            if (event.getCode() == KeyCode.BACK_SPACE) {
+                if (canvasModel.getCurrentSelection() != null) {
+                    removeComponent(canvasModel.getCurrentSelection());
+                }
             }
         });
     }
@@ -110,7 +131,7 @@ public class CanvasController {
      */
     private void initZoomFunction() {
         scrollPane.setOnZoom(e -> {
-            log.debug("Zoom event at {} {}", e.getX(), e.getY());
+            log.debug("Zoom event at [x={} y={}]", e.getX(), e.getY());
 
             Bounds viewPort = scrollPane.getViewportBounds();
             Bounds contentSize = canvasPane.getBoundsInParent();
@@ -137,16 +158,55 @@ public class CanvasController {
      */
     private void addNode(int x, int y) {
         // Delegate click event handler to every node object
-        DFANodeComponent node = new DFANodeComponent(x, y);
+        final DFANodeComponent node = new DFANodeComponent(x, y);
+        final ContextMenu nodeMenu = getNodeContextMenu(node);
         node.setOnMouseClicked((MouseEvent event) -> {
+            // select current node
             this.canvasModel.setCurrentSelection(node);
             event.consume();
         });
+        // show the context menu for a node
+        node.setOnContextMenuRequested((ContextMenuEvent event) -> {
+            nodeMenu.show(node, event.getScreenX(), event.getScreenY());
+            event.consume();
+        });
+
         // make the node draggable
         DraggableCanvasComponentController draggable = new DraggableCanvasComponentController(node, true, canvasModel);
         draggable.createDraggableProperty();
         canvasModel.getComponents().add(node);
-        log.debug("Add a node at [x = {}, y = {}]", x, y);
+        log.debug("Add a node at [x={}, y={}]", x, y);
     }
 
+    /**
+     * Constructs a context menu for a node.
+     *
+     * @param node the node this menu for
+     * @return a context menu that shows for a node
+     */
+    private ContextMenu getNodeContextMenu(DFANodeComponent node) {
+        final ContextMenu nodeMenu = new ContextMenu();
+        // delete the current node
+        final MenuItem deleteNodeItem = new MenuItem("Delete Node");
+        deleteNodeItem.setOnAction((ActionEvent event) -> removeComponent(node));
+
+        // add an edge to the current node
+        final MenuItem addEdgeItem = new MenuItem("Add Edge");
+        nodeMenu.getItems().addAll(deleteNodeItem, new SeparatorMenuItem(), addEdgeItem);
+        return nodeMenu;
+    }
+
+    /**
+     * Remove any canvas component being rendered on canvas
+     *
+     * @param component canvas component
+     */
+    private void removeComponent(CanvasComponent component) {
+        assert canvasModel.getComponents().contains(component);
+        canvasModel.getComponents().remove(component);
+        // if the instance being deleted is selected, set the current selection to null
+        if (component == canvasModel.getCurrentSelection()) {
+            canvasModel.setCurrentSelection(null);
+        }
+    }
 }

@@ -19,10 +19,6 @@ public class CanvasModel {
 
     private final DoubleProperty scale = new SimpleDoubleProperty(1.0);
 
-    public CanvasComponent getSelectedComponent() {
-        return selectedComponent.get();
-    }
-
     public final CanvasComponent getCurrentSelection() {
         return selectedComponent.get();
     }
@@ -34,7 +30,7 @@ public class CanvasModel {
         }
         if (component != null) {
             component.notifySelected();
-            selectedComponent.set(component);
         }
+        selectedComponent.set(component);
     }
 }
