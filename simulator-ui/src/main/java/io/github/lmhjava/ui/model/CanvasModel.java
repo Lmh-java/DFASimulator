@@ -26,7 +26,6 @@ public class CanvasModel {
     }
 
     public final void setCurrentSelection(CanvasComponent component) {
-        log.debug("{} is selected", component);
         // notify the new selection that it is selected and unselect the previous one
         if (selectedComponent.get() != null) {
             selectedComponent.get().notifyUnselected();

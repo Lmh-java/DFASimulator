@@ -37,8 +37,6 @@ public class DFAEdgeComponent extends CanvasComponent {
     private final LineTo baseLine;
     private final MoveTo originPoint;
 
-    private EventHandler<MouseEvent> syncPseudoNodeHandler;
-
     // These two following properties will not be used until edge is settled
     private DoubleBinding elevationAngleProperty;
     private IntegerBinding lengthProperty;
@@ -66,25 +64,28 @@ public class DFAEdgeComponent extends CanvasComponent {
         // construct an arrow based on head and tail node
         arrow.setStroke(ARROW_COLOR);
         arrow.setStrokeWidth(ARROW_STROKE_THICKNESS);
-        pane.layoutXProperty().bind(tailNodeObj.get().getCenterXProperty());
-        pane.layoutYProperty().bind(tailNodeObj.get().getCenterYProperty());
+        this.getXProperty().bind(tailNodeObj.get().getCenterXProperty());
+        this.getYProperty().bind(tailNodeObj.get().getCenterYProperty());
 
         // create a pseudo-node to help with locating the end node
         headNodeObj.set(null);
 
         // we don't bind properties here, since the properties can be calculated dynamically by mouse moving listeners
         baseLine.yProperty().set(0);
-        syncPseudoNodeHandler = (event) -> {
+        // rotate the arrow to make sure it aims to the mouse
+        // length of the arrow is the distance between two nodes
+        final EventHandler<MouseEvent> syncMouseHandler = (event) -> {
             final int headX = (int) event.getX(), headY = (int) event.getY();
             final int tailX = tailNodeObj.get().getCenterXProperty().intValue(), tailY = tailNodeObj.get().getCenterYProperty().intValue();
             // rotate the arrow to make sure it aims to the mouse
-            pane.getTransforms().clear();
+            this.getTransforms().clear();
             final Transform rotate = Transform.rotate(Math.toDegrees(Math.atan2(headY - tailY, headX - tailX)), 0, 0);
-            pane.getTransforms().add(rotate);
+            this.getTransforms().add(rotate);
             // length of the arrow is the distance between two nodes
             baseLine.xProperty().set(Math.sqrt(Math.pow((headX - tailX), 2) + Math.pow((headY - tailY), 2)) - SPACE_WIDTH);
+            event.consume();
         };
-        canvasPane.setOnMouseMoved(syncPseudoNodeHandler);
+        canvasPane.setOnMouseMoved(syncMouseHandler);
         arrow.getElements().addAll(originPoint, baseLine);
 
         pane.getChildren().addAll(arrow);
@@ -93,10 +94,9 @@ public class DFAEdgeComponent extends CanvasComponent {
 
     public void settle(DFANodeComponent headNode, Pane canvasPane) {
         if (headNode != null) {
-            // unbind to psedo-node and rebind to the new node
             canvasPane.setOnMouseMoved(null);
             headNodeObj.set(headNode);
-            // unlike syncPseudoNodeHandler, here, we need to dynamic binding to calculate rotated degrees and length
+            // unlike syncMouseHandler, here, we need to dynamic binding to calculate rotated degrees and length
             this.elevationAngleProperty = Bindings.createDoubleBinding(() -> {
                 final int headX = headNodeObj.get().getXProperty().get(), headY = headNodeObj.get().getYProperty().get();
                 final int tailX = tailNodeObj.get().getXProperty().get(), tailY = tailNodeObj.get().getYProperty().get();
@@ -110,11 +110,11 @@ public class DFAEdgeComponent extends CanvasComponent {
             }, headNodeObj.get().getXProperty(), headNodeObj.get().getYProperty(), tailNodeObj.get().getXProperty(), tailNodeObj.get().getYProperty());
 
             // bind angle property
-            pane.getTransforms().clear();
-            pane.getTransforms().add(Transform.rotate(this.elevationAngleProperty.get(), 0, 0));
+            this.getTransforms().clear();
+            this.getTransforms().add(Transform.rotate(this.elevationAngleProperty.get(), 0, 0));
             this.elevationAngleProperty.addListener((ob, oldValue, newValue) -> {
-                pane.getTransforms().clear();
-                pane.getTransforms().add(Transform.rotate(this.elevationAngleProperty.get(), 0, 0));
+                this.getTransforms().clear();
+                this.getTransforms().add(Transform.rotate(this.elevationAngleProperty.get(), 0, 0));
             });
 
             // bind length property

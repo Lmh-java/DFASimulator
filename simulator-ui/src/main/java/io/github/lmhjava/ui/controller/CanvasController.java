@@ -123,6 +123,7 @@ public class CanvasController {
                     removeComponent(canvasModel.getCurrentSelection());
                 }
             }
+            event.consume();
         });
     }
 
@@ -213,6 +214,7 @@ public class CanvasController {
                     // remove the current listener and resume the original listener
                     initKeyboardListeners();
                 }
+                event.consume();
             };
             scrollPane.setOnKeyPressed(keyEventHandler);
         }
