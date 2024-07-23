@@ -3,9 +3,13 @@ package io.github.lmhjava.ui.controller;
 
 import io.github.lmhjava.ui.model.CanvasModel;
 import io.github.lmhjava.ui.object.CanvasComponent;
+import io.github.lmhjava.ui.object.DFAEdgeComponent;
 import io.github.lmhjava.ui.object.DFANodeComponent;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.scene.control.*;
@@ -53,7 +57,6 @@ public class CanvasController {
         this.canvasModel.getScale().bindBidirectional(canvasPane.scaleXProperty());
         this.canvasModel.getScale().bindBidirectional(canvasPane.scaleYProperty());
 
-        // TODO: sync the actual displayed shapes with data models
         this.canvasModel.getComponents().addListener((SetChangeListener.Change<? extends CanvasComponent> c) -> {
             log.debug("Components in canvas model is changed, syncing to render");
             if (c.wasAdded()) {
@@ -179,6 +182,44 @@ public class CanvasController {
     }
 
     /**
+     * Add an edge to the canvas
+     */
+    private void addEdge() {
+        if (canvasModel.getCurrentSelection() instanceof DFANodeComponent tailNode) {
+            final DFAEdgeComponent edge = new DFAEdgeComponent(tailNode);
+            edge.initShape(canvasPane);
+            canvasModel.getComponents().add(edge);
+            canvasModel.setCurrentSelection(null);
+
+            // commit when the current selection is changed
+            final ChangeListener<? super CanvasComponent> selectionChangeListener = new ChangeListener<>() {
+                @Override
+                public void changed(ObservableValue<? extends CanvasComponent> ob, CanvasComponent oldValue, CanvasComponent newValue) {
+                    if (newValue instanceof DFANodeComponent headNode) {
+                        edge.settle(headNode, canvasPane);
+                        // remove this listener
+                        canvasModel.getSelectedComponent().removeListener(this);
+                        initKeyboardListeners();
+                    }
+                }
+            };
+            canvasModel.getSelectedComponent().addListener(selectionChangeListener);
+
+            // or ESC is pressed to stop adding an edge
+            final EventHandler<? super KeyEvent> keyEventHandler = (EventHandler<KeyEvent>) event -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    removeComponent(edge);
+                    canvasModel.getSelectedComponent().removeListener(selectionChangeListener);
+                    // remove the current listener and resume the original listener
+                    initKeyboardListeners();
+                }
+            };
+            scrollPane.setOnKeyPressed(keyEventHandler);
+        }
+
+    }
+
+    /**
      * Constructs a context menu for a node.
      *
      * @param node the node this menu for
@@ -192,6 +233,7 @@ public class CanvasController {
 
         // add an edge to the current node
         final MenuItem addEdgeItem = new MenuItem("Add Edge");
+        addEdgeItem.setOnAction((ActionEvent event) -> addEdge());
         nodeMenu.getItems().addAll(deleteNodeItem, new SeparatorMenuItem(), addEdgeItem);
         return nodeMenu;
     }

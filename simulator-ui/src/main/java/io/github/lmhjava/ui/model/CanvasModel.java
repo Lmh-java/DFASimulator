@@ -5,11 +5,13 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Data model class for all components being displayed on canvas.
  */
 @Getter
+@Slf4j
 public class CanvasModel {
     private final ObservableSet<CanvasComponent> components = FXCollections.observableSet();
     private final ObjectProperty<CanvasComponent> selectedComponent = new SimpleObjectProperty<>();
@@ -24,6 +26,7 @@ public class CanvasModel {
     }
 
     public final void setCurrentSelection(CanvasComponent component) {
+        log.debug("{} is selected", component);
         // notify the new selection that it is selected and unselect the previous one
         if (selectedComponent.get() != null) {
             selectedComponent.get().notifyUnselected();

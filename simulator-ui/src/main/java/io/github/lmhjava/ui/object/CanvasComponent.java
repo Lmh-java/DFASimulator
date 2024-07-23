@@ -2,8 +2,6 @@ package io.github.lmhjava.ui.object;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
