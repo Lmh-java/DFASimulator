@@ -53,6 +53,7 @@ public class DraggableCanvasComponentController {
             if (cycleStatus != INACTIVE) {
                 target.setTranslateX((event.getSceneX() - anchorX) / canvasModel.getScale().get());
                 target.setTranslateY((event.getSceneY() - anchorY) / canvasModel.getScale().get());
+                target.setOpacity(0.5);
             }
         };
         commitPositionOnRelease = event -> {
@@ -63,6 +64,7 @@ public class DraggableCanvasComponentController {
                 // clear changes from TranslateX and TranslateY
                 target.setTranslateX(0);
                 target.setTranslateY(0);
+                target.setOpacity(1);
             }
         };
     }

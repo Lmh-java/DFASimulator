@@ -15,6 +15,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.QuadCurveTo;
 import javafx.scene.transform.Transform;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,6 +34,8 @@ public class DFAEdgeComponent extends CanvasComponent {
     private static final int ARROW_HEAD_ANGLE = 30;
     private static final double LABEL_ARROW_GAP = 15;
     private static final double ARROW_HEAD_DELTA_Y = Math.sin(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH;
+    private static final double SELF_LOOP_ARROW_HEAD_LENGTH = ARROW_HEAD_LENGTH / 2d;
+    private static final double SELF_LOOP_ARROW_HEAD_ANGLE = ARROW_HEAD_ANGLE / 2d;
 
 
     private DFAEdge edge;
@@ -44,7 +47,7 @@ public class DFAEdgeComponent extends CanvasComponent {
     private final StackPane pane;
 
     private final Path arrow;
-    private final LineTo baseLine;
+    private final QuadCurveTo baseLine;
     private final MoveTo originPoint;
     private final LineTo leftArrowHead;
     private final LineTo rightArrowHead;
@@ -65,7 +68,7 @@ public class DFAEdgeComponent extends CanvasComponent {
         this.headNodeObj = new SimpleObjectProperty<>(null);
         this.isSettled = false;
         this.arrow = new Path();
-        this.baseLine = new LineTo();
+        this.baseLine = new QuadCurveTo();
         this.leftArrowHead = new LineTo();
         this.rightArrowHead = new LineTo();
         this.originPoint = new MoveTo(0, 0);
@@ -139,10 +142,34 @@ public class DFAEdgeComponent extends CanvasComponent {
     }
 
     public void settle(DFANodeComponent headNode, Pane canvasPane) {
-        if (headNode != null) {
-            canvasPane.setOnMouseMoved(null);
-            headNodeObj.set(headNode);
-            // unlike syncMouseHandler, here, we need to dynamic binding to calculate rotated degrees and length
+        assert headNode != null && canvasPane != null;
+        isSettled = true;
+        canvasPane.setOnMouseMoved(null);
+        headNodeObj.set(headNode);
+        // self-loop edge
+        if (getIsSelfLoop()) {
+            baseLine.setControlX(DFANodeComponent.NODE_CIRCLE_RADIUS / 2d);
+            baseLine.setControlY(DFANodeComponent.NODE_CIRCLE_RADIUS * 2);
+            baseLine.setX(DFANodeComponent.NODE_CIRCLE_RADIUS);
+            baseLine.setY(0);
+            tipPoint.setX(DFANodeComponent.NODE_CIRCLE_RADIUS);
+            tipPoint.setY(0);
+            leftArrowHead.setX(DFANodeComponent.NODE_CIRCLE_RADIUS - ARROW_HEAD_DELTA_Y);
+            leftArrowHead.setY(SELF_LOOP_ARROW_HEAD_LENGTH * Math.cos(Math.toRadians(SELF_LOOP_ARROW_HEAD_ANGLE)));
+            rightArrowHead.setX(DFANodeComponent.NODE_CIRCLE_RADIUS + ARROW_HEAD_DELTA_Y / 2);
+            rightArrowHead.setY(SELF_LOOP_ARROW_HEAD_LENGTH * Math.cos(Math.toRadians(SELF_LOOP_ARROW_HEAD_ANGLE)));
+            this.getTransforms().clear();
+            this.getTransforms().add(Transform.rotate(-180, 0, 0));
+            this.getTransforms().add(Transform.translate(- DFANodeComponent.NODE_CIRCLE_RADIUS, DFANodeComponent.NODE_CIRCLE_RADIUS - DFANodeComponent.SELECTION_CIRCLE_THICKNESS));
+            // mock elevation angle property for controlling the alphabet label
+            this.elevationAngleProperty = new DoubleBinding() {
+                @Override
+                protected double computeValue() {
+                    return -180;
+                }
+            };
+        } else {
+            // unlike syncMouseHandler, we need to dynamic binding to calculate rotated degrees and length
             this.elevationAngleProperty = Bindings.createDoubleBinding(() -> {
                 final int headX = headNodeObj.get().getXProperty().get(), headY = headNodeObj.get().getYProperty().get();
                 final int tailX = tailNodeObj.get().getXProperty().get(), tailY = tailNodeObj.get().getYProperty().get();
@@ -172,23 +199,26 @@ public class DFAEdgeComponent extends CanvasComponent {
             final double arrowHeadDeltaY = Math.sin(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH;
             leftArrowHead.yProperty().set(-arrowHeadDeltaY);
             rightArrowHead.yProperty().set(arrowHeadDeltaY);
-            // move two nodes on two ends to the front layer
-            headNodeObj.get().toFront();
-            tailNodeObj.get().toFront();
         }
-        isSettled = true;
+
+        // move two nodes on two ends to the front layer
+        headNodeObj.get().toFront();
+        tailNodeObj.get().toFront();
+
+        handleLabelPosition();
+
+        // initiate an edge model
         this.edge = new DFAEdge(tailNodeObj.get().getNode(), headNodeObj.get().getNode());
         initAlphabetListener();
         // FIXME: remove the following test code (2 lines)
         alphabets.add("Test1");
         alphabets.add("Test2");
-        calculateLabelPosition();
     }
 
     /**
      * Calculates (dynamically) the edge label position according to the position of the arrow.
      */
-    private void calculateLabelPosition() {
+    private void handleLabelPosition() {
         assert isSettled;
         // no matter which direction the arrow is, the label is always up and above the arrow.
         // if the arrow goes from left to right (-90 < angle < 90)
@@ -196,12 +226,17 @@ public class DFAEdgeComponent extends CanvasComponent {
         alphabetLabel.translateYProperty().bind(Bindings.createDoubleBinding(
                 () -> -90 < elevationAngleProperty.get() && elevationAngleProperty.get() < 90
                         ? -LABEL_ARROW_GAP
-                        : LABEL_ARROW_GAP, elevationAngleProperty));
+                        : LABEL_ARROW_GAP + (getIsSelfLoop() ? LABEL_ARROW_GAP : 0)
+                , elevationAngleProperty));
         // rotate the label to make sure the label is straight up.
         alphabetLabel.rotateProperty().bind(Bindings.createDoubleBinding(
                 () -> -90 < elevationAngleProperty.get() && elevationAngleProperty.get() < 90
                         ? 0d
                         : 180d, elevationAngleProperty));
+    }
+
+    private boolean getIsSelfLoop(){
+        return headNodeObj.get() == tailNodeObj.get();
     }
 
     @Override
