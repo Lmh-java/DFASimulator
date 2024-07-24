@@ -24,6 +24,8 @@ public class DFAEdgeComponent extends CanvasComponent {
     private static final Paint ARROW_COLOR = Color.RED;
     private static final int ARROW_STROKE_THICKNESS = 2;
     private static final int SPACE_WIDTH = 10;
+    private static final int ARROW_HEAD_LENGTH = 20;
+    private static final int ARROW_HEAD_ANGLE = 30;
 
     private DFAEdge edge;
     private final ObjectProperty<DFANodeComponent> tailNodeObj;
@@ -36,6 +38,9 @@ public class DFAEdgeComponent extends CanvasComponent {
     private final Path arrow;
     private final LineTo baseLine;
     private final MoveTo originPoint;
+    private final LineTo leftArrowHead;
+    private final LineTo rightArrowHead;
+    private final MoveTo tipPoint;
 
     // These two following properties will not be used until edge is settled
     private DoubleBinding elevationAngleProperty;
@@ -50,7 +55,10 @@ public class DFAEdgeComponent extends CanvasComponent {
         this.isSettled = false;
         this.arrow = new Path();
         this.baseLine = new LineTo();
+        this.leftArrowHead = new LineTo();
+        this.rightArrowHead = new LineTo();
         this.originPoint = new MoveTo(0, 0);
+        this.tipPoint = new MoveTo(0, 0);
         this.elevationAngleProperty = null;
         this.lengthProperty = null;
     }
@@ -72,8 +80,6 @@ public class DFAEdgeComponent extends CanvasComponent {
 
         // we don't bind properties here, since the properties can be calculated dynamically by mouse moving listeners
         baseLine.yProperty().set(0);
-        // rotate the arrow to make sure it aims to the mouse
-        // length of the arrow is the distance between two nodes
         final EventHandler<MouseEvent> syncMouseHandler = (event) -> {
             final int headX = (int) event.getX(), headY = (int) event.getY();
             final int tailX = tailNodeObj.get().getCenterXProperty().intValue(), tailY = tailNodeObj.get().getCenterYProperty().intValue();
@@ -82,11 +88,20 @@ public class DFAEdgeComponent extends CanvasComponent {
             final Transform rotate = Transform.rotate(Math.toDegrees(Math.atan2(headY - tailY, headX - tailX)), 0, 0);
             this.getTransforms().add(rotate);
             // length of the arrow is the distance between two nodes
-            baseLine.xProperty().set(Math.sqrt(Math.pow((headX - tailX), 2) + Math.pow((headY - tailY), 2)) - SPACE_WIDTH);
+            final double length = Math.sqrt(Math.pow((headX - tailX), 2) + Math.pow((headY - tailY), 2)) - SPACE_WIDTH;
+            baseLine.xProperty().set(length);
+            // calculate two noses of the arrow
+            tipPoint.xProperty().set(length);
+            final double arrowHeadX = length - Math.cos(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH;
+            final double arrowHeadDeltaY = Math.sin(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH;
+            leftArrowHead.xProperty().set(arrowHeadX);
+            rightArrowHead.xProperty().set(arrowHeadX);
+            leftArrowHead.yProperty().set(-arrowHeadDeltaY);
+            rightArrowHead.yProperty().set(arrowHeadDeltaY);
             event.consume();
         };
         canvasPane.setOnMouseMoved(syncMouseHandler);
-        arrow.getElements().addAll(originPoint, baseLine);
+        arrow.getElements().addAll(originPoint, baseLine, leftArrowHead, tipPoint, rightArrowHead);
 
         pane.getChildren().addAll(arrow);
         getChildren().add(pane);
@@ -106,7 +121,7 @@ public class DFAEdgeComponent extends CanvasComponent {
             this.lengthProperty = Bindings.createIntegerBinding(() -> {
                 final int headX = headNodeObj.get().getXProperty().get(), headY = headNodeObj.get().getYProperty().get();
                 final int tailX = tailNodeObj.get().getXProperty().get(), tailY = tailNodeObj.get().getYProperty().get();
-                return (int) Math.sqrt(Math.pow(headX - tailX, 2) + Math.pow(headY - tailY, 2));
+                return (int) Math.sqrt(Math.pow(headX - tailX, 2) + Math.pow(headY - tailY, 2)) - DFANodeComponent.NODE_CIRCLE_RADIUS - DFANodeComponent.SELECTION_CIRCLE_THICKNESS;
             }, headNodeObj.get().getXProperty(), headNodeObj.get().getYProperty(), tailNodeObj.get().getXProperty(), tailNodeObj.get().getYProperty());
 
             // bind angle property
@@ -119,6 +134,13 @@ public class DFAEdgeComponent extends CanvasComponent {
 
             // bind length property
             baseLine.xProperty().bind(this.lengthProperty);
+            tipPoint.xProperty().bind(this.lengthProperty);
+            // make two noses of the arrow
+            leftArrowHead.xProperty().bind(this.lengthProperty.subtract(Math.cos(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH));
+            rightArrowHead.xProperty().bind(this.lengthProperty.subtract(Math.cos(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH));
+            final double arrowHeadDeltaY = Math.sin(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH;
+            leftArrowHead.yProperty().set(-arrowHeadDeltaY);
+            rightArrowHead.yProperty().set(arrowHeadDeltaY);
             // move two nodes on two ends to the front layer
             headNodeObj.get().toFront();
             tailNodeObj.get().toFront();
