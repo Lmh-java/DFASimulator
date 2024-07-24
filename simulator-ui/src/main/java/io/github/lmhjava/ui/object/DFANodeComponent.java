@@ -25,6 +25,7 @@ public class DFANodeComponent extends CanvasComponent {
     private static final int SELECTION_CIRCLE_STROKE_WIDTH = 2;
     private static final Paint NODE_CIRCLE_STROKE = Color.BLACK;
 
+    @Getter
     private final DFANode node;
     private final Circle circle;
     private final Label label;

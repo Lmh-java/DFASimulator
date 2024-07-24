@@ -3,7 +3,10 @@ package io.github.lmhjava.ui.object;
 import io.github.lmhjava.engine.edge.DFAEdge;
 import javafx.beans.binding.*;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -14,6 +17,8 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.transform.Transform;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.StringJoiner;
 
 /**
  * Renderable wrapper of DFA edge.
@@ -26,6 +31,9 @@ public class DFAEdgeComponent extends CanvasComponent {
     private static final int SPACE_WIDTH = 10;
     private static final int ARROW_HEAD_LENGTH = 20;
     private static final int ARROW_HEAD_ANGLE = 30;
+    private static final double LABEL_ARROW_GAP = 15;
+    private static final double ARROW_HEAD_DELTA_Y = Math.sin(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH;
+
 
     private DFAEdge edge;
     private final ObjectProperty<DFANodeComponent> tailNodeObj;
@@ -41,6 +49,9 @@ public class DFAEdgeComponent extends CanvasComponent {
     private final LineTo leftArrowHead;
     private final LineTo rightArrowHead;
     private final MoveTo tipPoint;
+
+    private final Label alphabetLabel;
+    private final ObservableSet<String> alphabets;
 
     // These two following properties will not be used until edge is settled
     private DoubleBinding elevationAngleProperty;
@@ -59,8 +70,29 @@ public class DFAEdgeComponent extends CanvasComponent {
         this.rightArrowHead = new LineTo();
         this.originPoint = new MoveTo(0, 0);
         this.tipPoint = new MoveTo(0, 0);
+        this.alphabetLabel = new Label();
+        this.alphabets = FXCollections.observableSet();
         this.elevationAngleProperty = null;
         this.lengthProperty = null;
+    }
+
+    /**
+     * Initialize the alphabet set listener to sync information from the core DFA engine.
+     */
+    private void initAlphabetListener() {
+        Bindings.bindContent(edge.getAlphabet(), this.alphabets);
+        this.alphabetLabel.textProperty().bind(new StringBinding() {
+            {
+                this.bind(alphabets);
+            }
+
+            @Override
+            protected String computeValue() {
+                final StringJoiner sj = new StringJoiner(", ", "{", "}");
+                alphabets.forEach(sj::add);
+                return sj.toString();
+            }
+        });
     }
 
     /**
@@ -73,7 +105,7 @@ public class DFAEdgeComponent extends CanvasComponent {
         arrow.setStroke(ARROW_COLOR);
         arrow.setStrokeWidth(ARROW_STROKE_THICKNESS);
         this.getXProperty().bind(tailNodeObj.get().getCenterXProperty());
-        this.getYProperty().bind(tailNodeObj.get().getCenterYProperty());
+        this.getYProperty().bind(tailNodeObj.get().getCenterYProperty().subtract(ARROW_HEAD_DELTA_Y));
 
         // create a pseudo-node to help with locating the end node
         headNodeObj.set(null);
@@ -85,7 +117,7 @@ public class DFAEdgeComponent extends CanvasComponent {
             final int tailX = tailNodeObj.get().getCenterXProperty().intValue(), tailY = tailNodeObj.get().getCenterYProperty().intValue();
             // rotate the arrow to make sure it aims to the mouse
             this.getTransforms().clear();
-            final Transform rotate = Transform.rotate(Math.toDegrees(Math.atan2(headY - tailY, headX - tailX)), 0, 0);
+            final Transform rotate = Transform.rotate(Math.toDegrees(Math.atan2(headY - tailY, headX - tailX)), 0, ARROW_HEAD_DELTA_Y);
             this.getTransforms().add(rotate);
             // length of the arrow is the distance between two nodes
             final double length = Math.sqrt(Math.pow((headX - tailX), 2) + Math.pow((headY - tailY), 2)) - SPACE_WIDTH;
@@ -93,17 +125,16 @@ public class DFAEdgeComponent extends CanvasComponent {
             // calculate two noses of the arrow
             tipPoint.xProperty().set(length);
             final double arrowHeadX = length - Math.cos(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH;
-            final double arrowHeadDeltaY = Math.sin(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH;
             leftArrowHead.xProperty().set(arrowHeadX);
             rightArrowHead.xProperty().set(arrowHeadX);
-            leftArrowHead.yProperty().set(-arrowHeadDeltaY);
-            rightArrowHead.yProperty().set(arrowHeadDeltaY);
+            leftArrowHead.yProperty().set(-ARROW_HEAD_DELTA_Y);
+            rightArrowHead.yProperty().set(ARROW_HEAD_DELTA_Y);
             event.consume();
         };
         canvasPane.setOnMouseMoved(syncMouseHandler);
         arrow.getElements().addAll(originPoint, baseLine, leftArrowHead, tipPoint, rightArrowHead);
 
-        pane.getChildren().addAll(arrow);
+        pane.getChildren().addAll(arrow, alphabetLabel);
         getChildren().add(pane);
     }
 
@@ -126,10 +157,10 @@ public class DFAEdgeComponent extends CanvasComponent {
 
             // bind angle property
             this.getTransforms().clear();
-            this.getTransforms().add(Transform.rotate(this.elevationAngleProperty.get(), 0, 0));
+            this.getTransforms().add(Transform.rotate(this.elevationAngleProperty.get(), 0, ARROW_HEAD_DELTA_Y));
             this.elevationAngleProperty.addListener((ob, oldValue, newValue) -> {
                 this.getTransforms().clear();
-                this.getTransforms().add(Transform.rotate(this.elevationAngleProperty.get(), 0, 0));
+                this.getTransforms().add(Transform.rotate(this.elevationAngleProperty.get(), 0, ARROW_HEAD_DELTA_Y));
             });
 
             // bind length property
@@ -146,6 +177,31 @@ public class DFAEdgeComponent extends CanvasComponent {
             tailNodeObj.get().toFront();
         }
         isSettled = true;
+        this.edge = new DFAEdge(tailNodeObj.get().getNode(), headNodeObj.get().getNode());
+        initAlphabetListener();
+        // FIXME: remove the following test code (2 lines)
+        alphabets.add("Test1");
+        alphabets.add("Test2");
+        calculateLabelPosition();
+    }
+
+    /**
+     * Calculates (dynamically) the edge label position according to the position of the arrow.
+     */
+    private void calculateLabelPosition() {
+        assert isSettled;
+        // no matter which direction the arrow is, the label is always up and above the arrow.
+        // if the arrow goes from left to right (-90 < angle < 90)
+        // if the arrow goes from right to left (angle >= 90 || angle =< -90)
+        alphabetLabel.translateYProperty().bind(Bindings.createDoubleBinding(
+                () -> -90 < elevationAngleProperty.get() && elevationAngleProperty.get() < 90
+                        ? -LABEL_ARROW_GAP
+                        : LABEL_ARROW_GAP, elevationAngleProperty));
+        // rotate the label to make sure the label is straight up.
+        alphabetLabel.rotateProperty().bind(Bindings.createDoubleBinding(
+                () -> -90 < elevationAngleProperty.get() && elevationAngleProperty.get() < 90
+                        ? 0d
+                        : 180d, elevationAngleProperty));
     }
 
     @Override
