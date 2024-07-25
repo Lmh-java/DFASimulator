@@ -10,19 +10,21 @@ import javafx.scene.input.MouseEvent;
 /**
  * Controller that responses all draggable canvas components.
  * @link <a href="https://edencoding.com/drag-shapes-javafx/">Reference</a>
+ *
+ * TODO: refactor drag controllers
  */
 public class DraggableCanvasComponentController {
-    private final CanvasComponent target;
-    private double anchorX;
-    private double anchorY;
-    private EventHandler<MouseEvent> setAnchor;
-    private EventHandler<MouseEvent> updatePositionOnDrag;
-    private EventHandler<MouseEvent> commitPositionOnRelease;
-    private final int ACTIVE = 1;
-    private final int INACTIVE = 0;
-    private int cycleStatus = INACTIVE;
-    private BooleanProperty isDraggable;
-    private final CanvasModel canvasModel;
+    protected final CanvasComponent target;
+    protected double anchorX;
+    protected double anchorY;
+    protected EventHandler<MouseEvent> setAnchor;
+    protected EventHandler<MouseEvent> updatePositionOnDrag;
+    protected EventHandler<MouseEvent> commitPositionOnRelease;
+    protected final int ACTIVE = 1;
+    protected final int INACTIVE = 0;
+    protected int cycleStatus = INACTIVE;
+    protected BooleanProperty isDraggable;
+    protected final CanvasModel canvasModel;
 
     public DraggableCanvasComponentController(CanvasComponent target, CanvasModel canvasModel) {
         this(target, false, canvasModel);
@@ -36,7 +38,7 @@ public class DraggableCanvasComponentController {
         this.canvasModel = canvasModel;
     }
 
-    private void createHandlers() {
+    protected void createHandlers() {
         setAnchor = event -> {
             if (event.isPrimaryButtonDown()) {
                 cycleStatus = ACTIVE;

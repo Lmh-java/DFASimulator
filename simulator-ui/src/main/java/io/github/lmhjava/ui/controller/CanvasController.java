@@ -176,8 +176,7 @@ public class CanvasController {
         });
 
         // make the node draggable
-        DraggableCanvasComponentController draggable = new DraggableCanvasComponentController(node, true, canvasModel);
-        draggable.createDraggableProperty();
+        new DraggableCanvasComponentController(node, true, canvasModel);
         canvasModel.getComponents().add(node);
         log.debug("Add a node at [x={}, y={}]", x, y);
     }
@@ -198,6 +197,16 @@ public class CanvasController {
                 public void changed(ObservableValue<? extends CanvasComponent> ob, CanvasComponent oldValue, CanvasComponent newValue) {
                     if (newValue instanceof DFANodeComponent headNode) {
                         edge.settle(headNode, canvasPane);
+                        // allows user to bend the arrow
+                        if (!edge.isSelfLoop()) {
+                            new DragToAdjustComponentController(edge, true, canvasModel, (deltaX, deltaY) -> {
+                                if (edge.isUpDown()) {
+                                    edge.setArrowControl(deltaX * (edge.isLeftToRight() ? 1 : -1));
+                                } else {
+                                    edge.setArrowControl(deltaY * (edge.isLeftToRight() ? 1 : -1));
+                                }
+                            });
+                        }
                         // remove this listener
                         canvasModel.getSelectedComponent().removeListener(this);
                         initKeyboardListeners();

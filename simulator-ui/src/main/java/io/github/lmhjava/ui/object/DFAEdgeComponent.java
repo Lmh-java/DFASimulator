@@ -6,6 +6,7 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -23,6 +24,7 @@ import java.util.StringJoiner;
 
 /**
  * Renderable wrapper of DFA edge.
+ * TODO: refactor: an arrow should be an individual component
  */
 @Slf4j
 public class DFAEdgeComponent extends CanvasComponent {
@@ -99,6 +101,26 @@ public class DFAEdgeComponent extends CanvasComponent {
     }
 
     /**
+     * Initialize cursor to match the direction of the arrow.
+     *
+     * @implNote For better user experience, the cursor show display resize prompt in the direction
+     * perpendicular to the direction of the arrow.
+     */
+    private void initCursor() {
+        assert !isSelfLoop();
+        // show cursors depending on whether the arrow is vertical or horizontal.
+        this.cursorProperty().bind(new ObjectBinding<>() {
+            {
+                this.bind(elevationAngleProperty);
+            }
+            @Override
+            protected Cursor computeValue() {
+                return isUpDown() ? Cursor.H_RESIZE : Cursor.V_RESIZE;
+            }
+        });
+    }
+
+    /**
      * Initialize the shape of an edge component
      *
      * @implNote at this moment, {@code isSettle} is {@code false}.
@@ -124,7 +146,8 @@ public class DFAEdgeComponent extends CanvasComponent {
             this.getTransforms().add(rotate);
             // length of the arrow is the distance between two nodes
             final double length = Math.sqrt(Math.pow((headX - tailX), 2) + Math.pow((headY - tailY), 2)) - SPACE_WIDTH;
-            baseLine.xProperty().set(length);
+            baseLine.setX(length);
+            baseLine.setControlX(length / 2);
             // calculate two noses of the arrow
             tipPoint.xProperty().set(length);
             final double arrowHeadX = length - Math.cos(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH;
@@ -147,7 +170,7 @@ public class DFAEdgeComponent extends CanvasComponent {
         canvasPane.setOnMouseMoved(null);
         headNodeObj.set(headNode);
         // self-loop edge
-        if (getIsSelfLoop()) {
+        if (isSelfLoop()) {
             baseLine.setControlX(DFANodeComponent.NODE_CIRCLE_RADIUS / 2d);
             baseLine.setControlY(DFANodeComponent.NODE_CIRCLE_RADIUS * 2);
             baseLine.setX(DFANodeComponent.NODE_CIRCLE_RADIUS);
@@ -160,7 +183,7 @@ public class DFAEdgeComponent extends CanvasComponent {
             rightArrowHead.setY(SELF_LOOP_ARROW_HEAD_LENGTH * Math.cos(Math.toRadians(SELF_LOOP_ARROW_HEAD_ANGLE)));
             this.getTransforms().clear();
             this.getTransforms().add(Transform.rotate(-180, 0, 0));
-            this.getTransforms().add(Transform.translate(- DFANodeComponent.NODE_CIRCLE_RADIUS, DFANodeComponent.NODE_CIRCLE_RADIUS - DFANodeComponent.SELECTION_CIRCLE_THICKNESS));
+            this.getTransforms().add(Transform.translate(-DFANodeComponent.NODE_CIRCLE_RADIUS, DFANodeComponent.NODE_CIRCLE_RADIUS - DFANodeComponent.SELECTION_CIRCLE_THICKNESS));
             // mock elevation angle property for controlling the alphabet label
             this.elevationAngleProperty = new DoubleBinding() {
                 @Override
@@ -192,13 +215,14 @@ public class DFAEdgeComponent extends CanvasComponent {
 
             // bind length property
             baseLine.xProperty().bind(this.lengthProperty);
-            tipPoint.xProperty().bind(this.lengthProperty);
+            baseLine.controlXProperty().bind(this.lengthProperty.divide(2));
             // make two noses of the arrow
-            leftArrowHead.xProperty().bind(this.lengthProperty.subtract(Math.cos(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH));
-            rightArrowHead.xProperty().bind(this.lengthProperty.subtract(Math.cos(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH));
-            final double arrowHeadDeltaY = Math.sin(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH;
-            leftArrowHead.yProperty().set(-arrowHeadDeltaY);
-            rightArrowHead.yProperty().set(arrowHeadDeltaY);
+            handleArrowNoses();
+
+            // translate Y of the pane to complement the change in concurvity of the arrow
+            pane.translateYProperty().bind(Bindings.createDoubleBinding(() -> baseLine.controlYProperty().get() < 0 ? baseLine.getControlY() / 2 : 0, baseLine.controlYProperty()));
+
+            initCursor();
         }
 
         // move two nodes on two ends to the front layer
@@ -216,6 +240,23 @@ public class DFAEdgeComponent extends CanvasComponent {
     }
 
     /**
+     * Calculates (dynamically) the arrow nose positions for non-self-loop edges
+     *
+     * @implNote this function only handles non-self-loop edges
+     */
+    private void handleArrowNoses() {
+        assert !isSelfLoop();
+        // the angle between the line connecting the vertex of the curve with one end of the curve and the original horizontal line before bending.
+        tipPoint.xProperty().bind(lengthProperty);
+        final DoubleBinding deltaAngle = Bindings.createDoubleBinding(() -> - Math.atan2(baseLine.getControlY(), (double) lengthProperty.get() / 2), baseLine.controlYProperty(), lengthProperty);
+        final DoubleBinding originalX = this.lengthProperty.subtract(Math.cos(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH);
+        leftArrowHead.xProperty().bind(Bindings.createDoubleBinding(() -> (originalX.get() - lengthProperty.get()) * Math.cos(deltaAngle.get()) + ARROW_HEAD_DELTA_Y * Math.sin(deltaAngle.get()) + lengthProperty.get(), deltaAngle, originalX, lengthProperty));
+        leftArrowHead.yProperty().bind(Bindings.createDoubleBinding(() -> (originalX.get() - lengthProperty.get()) * Math.sin(deltaAngle.get()) - ARROW_HEAD_DELTA_Y * Math.cos(deltaAngle.get()), deltaAngle, lengthProperty));
+        rightArrowHead.xProperty().bind(Bindings.createDoubleBinding(() -> (originalX.get() - lengthProperty.get()) * Math.cos(deltaAngle.get()) - ARROW_HEAD_DELTA_Y * Math.sin(deltaAngle.get()) + lengthProperty.get(), deltaAngle, originalX, lengthProperty));
+        rightArrowHead.yProperty().bind(Bindings.createDoubleBinding(() -> (originalX.get() - lengthProperty.get()) * Math.sin(deltaAngle.get()) + ARROW_HEAD_DELTA_Y * Math.cos(deltaAngle.get()), deltaAngle, lengthProperty));
+    }
+
+    /**
      * Calculates (dynamically) the edge label position according to the position of the arrow.
      */
     private void handleLabelPosition() {
@@ -224,19 +265,29 @@ public class DFAEdgeComponent extends CanvasComponent {
         // if the arrow goes from left to right (-90 < angle < 90)
         // if the arrow goes from right to left (angle >= 90 || angle =< -90)
         alphabetLabel.translateYProperty().bind(Bindings.createDoubleBinding(
-                () -> -90 < elevationAngleProperty.get() && elevationAngleProperty.get() < 90
+                () -> (isLeftToRight()
                         ? -LABEL_ARROW_GAP
-                        : LABEL_ARROW_GAP + (getIsSelfLoop() ? LABEL_ARROW_GAP : 0)
-                , elevationAngleProperty));
+                        : LABEL_ARROW_GAP + (isSelfLoop() ? LABEL_ARROW_GAP : 0))
+                        + (isSelfLoop() ? 0 : this.baseLine.getControlY() / 4)
+                , elevationAngleProperty, this.baseLine.controlYProperty()));
         // rotate the label to make sure the label is straight up.
         alphabetLabel.rotateProperty().bind(Bindings.createDoubleBinding(
-                () -> -90 < elevationAngleProperty.get() && elevationAngleProperty.get() < 90
+                () -> isLeftToRight()
                         ? 0d
                         : 180d, elevationAngleProperty));
     }
 
-    private boolean getIsSelfLoop(){
+    public boolean isSelfLoop() {
         return headNodeObj.get() == tailNodeObj.get();
+    }
+
+    public boolean isUpDown() {
+        return (45 < this.elevationAngleProperty.get() && this.elevationAngleProperty.get() < 135)
+                || (this.elevationAngleProperty.get() > -135 && this.elevationAngleProperty.get() < -45);
+    }
+
+    public boolean isLeftToRight() {
+        return -90 < elevationAngleProperty.get() && elevationAngleProperty.get() < 90;
     }
 
     @Override
@@ -247,5 +298,14 @@ public class DFAEdgeComponent extends CanvasComponent {
     @Override
     public void notifyUnselected() {
 
+    }
+
+    /**
+     * Sets the value of controlY coordinate of the baseline of the arrow
+     *
+     * @param newControlVal new control value
+     */
+    public void setArrowControl(double newControlVal) {
+        this.baseLine.setControlY(newControlVal);
     }
 }
