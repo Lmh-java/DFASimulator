@@ -72,7 +72,7 @@ public class DFAEdgeComponent extends CanvasComponent {
         // FIXME: delete the following line of test code (2 lines)
         this.pane.setStyle("-fx-background-color: rgba(255, 255, 255, 0.4);");
         super.setBackground(new Background(new BackgroundFill(ARROW_COLOR, null, null)));
-        
+
         this.headNodeObj = new SimpleObjectProperty<>(null);
         this.isSettled = false;
         this.arrow = new Path();
@@ -331,5 +331,13 @@ public class DFAEdgeComponent extends CanvasComponent {
     public void setContextMenu(EventHandler<ContextMenuEvent> menuHandler) {
         arrow.setOnContextMenuRequested(menuHandler);
         alphabetLabel.setOnContextMenuRequested(menuHandler);
+    }
+
+    public DFANodeComponent getTailNode() {
+        return tailNodeObj.get();
+    }
+
+    public DFANodeComponent getHeadNode() {
+        return headNodeObj.get();
     }
 }

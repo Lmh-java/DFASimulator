@@ -5,6 +5,7 @@ import io.github.lmhjava.ui.model.CanvasModel;
 import io.github.lmhjava.ui.object.CanvasComponent;
 import io.github.lmhjava.ui.object.DFAEdgeComponent;
 import io.github.lmhjava.ui.object.DFANodeComponent;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
@@ -283,6 +284,11 @@ public class CanvasController {
     private void removeComponent(CanvasComponent component) {
         assert canvasModel.getComponents().contains(component);
         canvasModel.getComponents().remove(component);
+        // if user deletes a node, also delete relevant edges.
+        // NOTE: run this task in the background to save resources
+        if (component instanceof DFANodeComponent c) {
+            Platform.runLater(() -> canvasModel.getComponents().removeIf((CanvasComponent comp) -> comp instanceof DFAEdgeComponent edge && (edge.getTailNode() == c || edge.getHeadNode() == c)));
+        }
         // if the instance being deleted is selected, set the current selection to null
         if (component == canvasModel.getCurrentSelection()) {
             canvasModel.setCurrentSelection(null);
