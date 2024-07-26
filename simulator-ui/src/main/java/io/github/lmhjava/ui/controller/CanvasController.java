@@ -196,6 +196,7 @@ public class CanvasController {
                 @Override
                 public void changed(ObservableValue<? extends CanvasComponent> ob, CanvasComponent oldValue, CanvasComponent newValue) {
                     if (newValue instanceof DFANodeComponent headNode) {
+                        final ContextMenu edgeMenu = getEdgeContextMenu(edge);
                         edge.settle(headNode, canvasPane);
                         // allows user to bend the arrow
                         if (!edge.isSelfLoop()) {
@@ -207,6 +208,16 @@ public class CanvasController {
                                 }
                             });
                         }
+                        // mouse click listener
+                        edge.setOnMouseClicked((MouseEvent event) -> {
+                            canvasModel.setCurrentSelection(edge);
+                            event.consume();
+                        });
+                        // context menu request listener
+                        edge.setContextMenu((ContextMenuEvent event) -> {
+                            edgeMenu.show(edge, event.getScreenX(), event.getScreenY());
+                            event.consume();
+                        });
                         // remove this listener
                         canvasModel.getSelectedComponent().removeListener(this);
                         initKeyboardListeners();
@@ -247,6 +258,21 @@ public class CanvasController {
         addEdgeItem.setOnAction((ActionEvent event) -> addEdge());
         nodeMenu.getItems().addAll(deleteNodeItem, new SeparatorMenuItem(), addEdgeItem);
         return nodeMenu;
+    }
+
+    /**
+     * Constructs a context menu for an edge.
+     *
+     * @param edge the edge this menu for
+     * @return a context menu that shows for an edge
+     */
+    private ContextMenu getEdgeContextMenu(DFAEdgeComponent edge) {
+        final ContextMenu edgeMenu = new ContextMenu();
+        // delete current edge
+        final MenuItem deleteEdgeItem = new MenuItem("Delete Edge");
+        deleteEdgeItem.setOnAction((ActionEvent event) -> removeComponent(edge));
+        edgeMenu.getItems().add(deleteEdgeItem);
+        return edgeMenu;
     }
 
     /**

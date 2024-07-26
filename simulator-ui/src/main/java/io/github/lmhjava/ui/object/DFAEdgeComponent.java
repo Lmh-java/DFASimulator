@@ -8,7 +8,11 @@ import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.effect.Glow;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -65,8 +69,10 @@ public class DFAEdgeComponent extends CanvasComponent {
     public DFAEdgeComponent(DFANodeComponent tailNode) {
         this.tailNodeObj = new SimpleObjectProperty<>(tailNode);
         this.pane = new StackPane();
-        // FIXME: delete the following line of test code
+        // FIXME: delete the following line of test code (2 lines)
         this.pane.setStyle("-fx-background-color: rgba(255, 255, 255, 0.4);");
+        super.setBackground(new Background(new BackgroundFill(ARROW_COLOR, null, null)));
+        
         this.headNodeObj = new SimpleObjectProperty<>(null);
         this.isSettled = false;
         this.arrow = new Path();
@@ -113,6 +119,7 @@ public class DFAEdgeComponent extends CanvasComponent {
             {
                 this.bind(elevationAngleProperty);
             }
+
             @Override
             protected Cursor computeValue() {
                 return isUpDown() ? Cursor.H_RESIZE : Cursor.V_RESIZE;
@@ -219,9 +226,16 @@ public class DFAEdgeComponent extends CanvasComponent {
             // make two noses of the arrow
             handleArrowNoses();
 
-            // translate Y of the pane to complement the change in concurvity of the arrow
-            pane.translateYProperty().bind(Bindings.createDoubleBinding(() -> baseLine.controlYProperty().get() < 0 ? baseLine.getControlY() / 2 : 0, baseLine.controlYProperty()));
-
+            // translate Y and X of the region to complement the change in concurvity of the arrow
+            this.translateYProperty().bind(Bindings.createDoubleBinding(() -> baseLine.controlYProperty().get() < 0
+                            ? baseLine.getControlY() / 2 * Math.sin(Math.toRadians(90 - elevationAngleProperty.get()))
+                            : 0
+                    , baseLine.controlYProperty(), elevationAngleProperty));
+            this.translateXProperty().bind(Bindings.createDoubleBinding(() ->
+                            baseLine.controlYProperty().get() < 0
+                                    ? -baseLine.getControlY() / 2 * Math.cos(Math.toRadians(90 - elevationAngleProperty.get()))
+                                    : 0
+                    , baseLine.controlYProperty(), elevationAngleProperty));
             initCursor();
         }
 
@@ -248,7 +262,7 @@ public class DFAEdgeComponent extends CanvasComponent {
         assert !isSelfLoop();
         // the angle between the line connecting the vertex of the curve with one end of the curve and the original horizontal line before bending.
         tipPoint.xProperty().bind(lengthProperty);
-        final DoubleBinding deltaAngle = Bindings.createDoubleBinding(() -> - Math.atan2(baseLine.getControlY(), (double) lengthProperty.get() / 2), baseLine.controlYProperty(), lengthProperty);
+        final DoubleBinding deltaAngle = Bindings.createDoubleBinding(() -> -Math.atan2(baseLine.getControlY(), (double) lengthProperty.get() / 2), baseLine.controlYProperty(), lengthProperty);
         final DoubleBinding originalX = this.lengthProperty.subtract(Math.cos(Math.toRadians(ARROW_HEAD_ANGLE)) * ARROW_HEAD_LENGTH);
         leftArrowHead.xProperty().bind(Bindings.createDoubleBinding(() -> (originalX.get() - lengthProperty.get()) * Math.cos(deltaAngle.get()) + ARROW_HEAD_DELTA_Y * Math.sin(deltaAngle.get()) + lengthProperty.get(), deltaAngle, originalX, lengthProperty));
         leftArrowHead.yProperty().bind(Bindings.createDoubleBinding(() -> (originalX.get() - lengthProperty.get()) * Math.sin(deltaAngle.get()) - ARROW_HEAD_DELTA_Y * Math.cos(deltaAngle.get()), deltaAngle, lengthProperty));
@@ -292,12 +306,12 @@ public class DFAEdgeComponent extends CanvasComponent {
 
     @Override
     public void notifySelected() {
-
+        arrow.setEffect(new Glow(1.5));
     }
 
     @Override
     public void notifyUnselected() {
-
+        arrow.setEffect(null);
     }
 
     /**
@@ -307,5 +321,15 @@ public class DFAEdgeComponent extends CanvasComponent {
      */
     public void setArrowControl(double newControlVal) {
         this.baseLine.setControlY(newControlVal);
+    }
+
+    /**
+     * Set context menu of this edge
+     *
+     * @param menuHandler function to trigger when menu is requested
+     */
+    public void setContextMenu(EventHandler<ContextMenuEvent> menuHandler) {
+        arrow.setOnContextMenuRequested(menuHandler);
+        alphabetLabel.setOnContextMenuRequested(menuHandler);
     }
 }
