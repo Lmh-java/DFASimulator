@@ -2,6 +2,10 @@ package io.github.lmhjava.ui.object;
 
 import io.github.lmhjava.engine.dfa.DFANode;
 import javafx.beans.binding.NumberBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -33,6 +37,13 @@ public class DFANodeComponent extends CanvasComponent {
     private final StackPane pane;
 
     @Getter
+    private final StringProperty contentProperty;
+    @Getter
+    private final BooleanProperty isInitialProperty;
+    @Getter
+    private final BooleanProperty isAcceptProperty;
+
+    @Getter
     private final NumberBinding centerXProperty;
     @Getter
     private final NumberBinding centerYProperty;
@@ -47,10 +58,15 @@ public class DFANodeComponent extends CanvasComponent {
         selectionCircle = new Circle();
         label = new Label();
 
+        contentProperty = new SimpleStringProperty(node.getContent());
+        isInitialProperty = new SimpleBooleanProperty(false);
+        isAcceptProperty = new SimpleBooleanProperty(false);
+
         centerXProperty = getXProperty().add(NODE_CIRCLE_RADIUS + SELECTION_CIRCLE_THICKNESS);
         centerYProperty = getYProperty().add(NODE_CIRCLE_RADIUS + SELECTION_CIRCLE_THICKNESS);
 
         initShape();
+        initPropertyListeners();
     }
 
     private void initShape() {
@@ -64,14 +80,18 @@ public class DFANodeComponent extends CanvasComponent {
         selectionCircle.setStrokeWidth(SELECTION_CIRCLE_STROKE_WIDTH);
         selectionCircle.setVisible(false);
 
-        label.setText(this.node.getContent());
+        label.textProperty().bind(contentProperty);
         label.setStyle("-fx-text-fill: white;");
 
         pane.getChildren().addAll(circle, selectionCircle, label);
         super.getChildren().add(pane);
 
         // FIXME: the cursor style is not changed on Mac (Not tested on other platforms)
-        this.setCursor(Cursor.MOVE);
+        this.setCursor(Cursor.HAND);
+    }
+
+    private void initPropertyListeners() {
+        contentProperty.addListener((observable, oldValue, newValue) -> node.setContent(newValue));
     }
 
     /**

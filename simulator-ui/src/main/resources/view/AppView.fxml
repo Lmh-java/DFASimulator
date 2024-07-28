@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -11,7 +8,7 @@
             fx:controller="io.github.lmhjava.ui.controller.AppController">
   <VBox AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0"
         AnchorPane.topAnchor="0">
-    <SplitPane dividerPositions="0.8" VBox.vgrow="ALWAYS">
+    <SplitPane dividerPositions="0.75" VBox.vgrow="ALWAYS">
       <VBox HBox.hgrow="ALWAYS">
         <fx:include source="ToolboxView.fxml" VBox.vgrow="NEVER"/>
         <fx:include source="CanvasView.fxml" VBox.vgrow="ALWAYS"/>

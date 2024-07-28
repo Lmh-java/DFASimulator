@@ -6,5 +6,46 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="io.github.lmhjava.ui.controller.PropertyViewerController">
-  <Label AnchorPane.leftAnchor="10">Test Property View</Label>
+  <VBox alignment="TOP_CENTER" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="10" fx:id="propertyPane">
+    <Label>Properties</Label>
+    <Region fx:id="iconRegion" VBox.vgrow="NEVER"/>
+
+    <GridPane fx:id="edgeInfoPane" VBox.vgrow="ALWAYS" hgap="20" vgap="10">
+      <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES"/>
+        <ColumnConstraints hgrow="ALWAYS"/>
+      </columnConstraints>
+
+      <Label GridPane.columnIndex="0" GridPane.rowIndex="0" alignment="BASELINE_RIGHT">Alphabets</Label>
+      <ListView GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="edgeAlphabetSetField"/>
+
+      <Label GridPane.columnIndex="0" GridPane.rowIndex="1" alignment="BASELINE_RIGHT">Else Edge?</Label>
+      <CheckBox GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="edgeIsElseEdgeCheckBox" />
+
+      <Label GridPane.columnIndex="0" GridPane.rowIndex="2" alignment="BASELINE_RIGHT">is Self-loop?</Label>
+      <Label GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="edgeIsSelfLoopLabel">NO</Label>
+    </GridPane>
+
+    <GridPane fx:id="nodeInfoPane" VBox.vgrow="ALWAYS" hgap="20" vgap="10">
+      <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES"/>
+        <ColumnConstraints hgrow="ALWAYS"/>
+      </columnConstraints>
+      <Label GridPane.columnIndex="0" GridPane.rowIndex="0" alignment="BASELINE_RIGHT">Node Content</Label>
+      <TextField GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="nodeContentField"/>
+
+      <Label GridPane.columnIndex="0" GridPane.rowIndex="1" alignment="BASELINE_RIGHT">Complete?</Label>
+      <Label GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="nodeIsCompleteLabel">NO</Label>
+
+      <Label GridPane.columnIndex="0" GridPane.rowIndex="2" alignment="BASELINE_RIGHT">Initial State?</Label>
+      <CheckBox GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="nodeIsInitialCheckBox" />
+
+      <Label GridPane.columnIndex="0" GridPane.rowIndex="3" alignment="BASELINE_RIGHT">Accept State?</Label>
+      <CheckBox GridPane.columnIndex="1" GridPane.rowIndex="3" fx:id="nodeIsAcceptedCheckBox" />
+    </GridPane>
+
+    <GridPane fx:id="dfaInfoPane" VBox.vgrow="ALWAYS">
+
+    </GridPane>
+  </VBox>
 </AnchorPane>
