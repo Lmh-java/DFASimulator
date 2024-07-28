@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * Canvas controller
  */
 @Slf4j
-public class CanvasController {
+public class CanvasController extends AppController {
 
     @FXML
     private ScrollPane scrollPane;
@@ -161,7 +161,7 @@ public class CanvasController {
      * @param x x position of the node
      * @param y y position of the node
      */
-    private void addNode(int x, int y) {
+    public void addNode(int x, int y) {
         // Delegate click event handler to every node object
         final DFANodeComponent node = new DFANodeComponent(x, y);
         final ContextMenu nodeMenu = getNodeContextMenu(node);
@@ -185,7 +185,7 @@ public class CanvasController {
     /**
      * Add an edge to the canvas
      */
-    private void addEdge() {
+    public void addEdge() {
         if (canvasModel.getCurrentSelection() instanceof DFANodeComponent tailNode) {
             final DFAEdgeComponent edge = new DFAEdgeComponent(tailNode);
             edge.initShape(canvasPane);

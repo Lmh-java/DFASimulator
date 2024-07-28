@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="io.github.lmhjava.ui.controller.AppController">
+  <VBox AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0"
+        AnchorPane.topAnchor="0">
+    <SplitPane dividerPositions="0.8" VBox.vgrow="ALWAYS">
+      <VBox HBox.hgrow="ALWAYS">
+        <fx:include source="ToolboxView.fxml" VBox.vgrow="NEVER"/>
+        <fx:include source="CanvasView.fxml" VBox.vgrow="ALWAYS"/>
+      </VBox>
+
+      <fx:include source="PropertyView.fxml" HBox.hgrow="NEVER"/>
+    </SplitPane>
+    <fx:include source="MessageBarView.fxml" VBox.vgrow="NEVER"/>
+  </VBox>
+</AnchorPane>

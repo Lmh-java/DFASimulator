@@ -6,7 +6,9 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="io.github.lmhjava.ui.controller.CanvasController">
+            fx:controller="io.github.lmhjava.ui.controller.CanvasController"
+            prefWidth="1.0"
+            prefHeight="1.0">
   <ScrollPane fx:id="scrollPane"
               AnchorPane.topAnchor="0.0"
               AnchorPane.bottomAnchor="0.0"

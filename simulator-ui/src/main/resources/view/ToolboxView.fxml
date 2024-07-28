@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="io.github.lmhjava.ui.controller.ToolboxController" spacing="2">
+    <Button fx:id="selectButton">
+        <tooltip>
+            <Tooltip text="select a DFA object" />
+        </tooltip>
+        <graphic>
+            <FontIcon iconLiteral="mdi-cursor-default"/>
+        </graphic>
+    </Button>
+    <Button fx:id="moveButton" onAction="#onMoveButtonClicked">
+        <tooltip>
+            <Tooltip text="move a DFA object" />
+        </tooltip>
+        <graphic>
+            <FontIcon iconLiteral="mdi-arrow-all"/>
+        </graphic>
+    </Button>
+    <Button fx:id="addNodeButton" onAction="#onAddNodeButtonClicked">
+        <tooltip>
+            <Tooltip text="add a DFA node" />
+        </tooltip>
+        <graphic>
+            <FontIcon iconLiteral="mdi-vector-point"/>
+        </graphic>
+    </Button>
+    <Button fx:id="addEdgeButton" onAction="#onAddEdgeButtonClicked">
+        <tooltip>
+            <Tooltip text="add a DFA edge" />
+        </tooltip>
+        <graphic>
+            <FontIcon iconLiteral="mdi-vector-line"/>
+        </graphic>
+    </Button>
+</HBox>
