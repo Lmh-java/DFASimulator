@@ -45,6 +45,10 @@
     </GridPane>
 
     <GridPane fx:id="dfaInfoPane" VBox.vgrow="ALWAYS">
+      <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES"/>
+        <ColumnConstraints hgrow="ALWAYS"/>
+      </columnConstraints>
 
     </GridPane>
   </VBox>

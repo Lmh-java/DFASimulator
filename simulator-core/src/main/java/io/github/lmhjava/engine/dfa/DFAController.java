@@ -281,4 +281,13 @@ public class DFAController {
         }
         return currentNode.getNextNode(input);
     }
+
+    /**
+     * Return true if the DFA is on a accepted state. Otherwise, false.
+     *
+     * @return true if the DFA is on a accepted state. Otherwise, false.
+     */
+    public boolean isAccepted() {
+        return currentNode != null && currentNode.isAccepted();
+    }
 }

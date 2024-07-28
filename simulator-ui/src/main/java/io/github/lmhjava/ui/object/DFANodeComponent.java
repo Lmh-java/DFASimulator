@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.effect.Glow;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -33,7 +34,7 @@ public class DFANodeComponent extends CanvasComponent {
     private final DFANode node;
     private final Circle circle;
     private final Label label;
-    private final Circle selectionCircle;
+    private final Circle surroundingCircle;
     private final StackPane pane;
 
     @Getter
@@ -52,10 +53,8 @@ public class DFANodeComponent extends CanvasComponent {
         super(x, y);
         node = new DFANode("Default");
         pane = new StackPane();
-        // FIXME: delete the following line of test code
-        pane.setStyle("-fx-background-color: rgba(0, 0, 255, 0.4);");
         circle = new Circle();
-        selectionCircle = new Circle();
+        surroundingCircle = new Circle();
         label = new Label();
 
         contentProperty = new SimpleStringProperty(node.getContent());
@@ -74,16 +73,16 @@ public class DFANodeComponent extends CanvasComponent {
         circle.setStroke(NODE_CIRCLE_STROKE);
         circle.setStrokeWidth(NODE_CIRCLE_STROKE_WIDTH);
 
-        selectionCircle.setRadius(NODE_CIRCLE_RADIUS + SELECTION_CIRCLE_THICKNESS);
-        selectionCircle.setFill(null);
-        selectionCircle.setStroke(NODE_CIRCLE_STROKE);
-        selectionCircle.setStrokeWidth(SELECTION_CIRCLE_STROKE_WIDTH);
-        selectionCircle.setVisible(false);
+        surroundingCircle.setRadius(NODE_CIRCLE_RADIUS + SELECTION_CIRCLE_THICKNESS);
+        surroundingCircle.setFill(null);
+        surroundingCircle.setStroke(NODE_CIRCLE_STROKE);
+        surroundingCircle.setStrokeWidth(SELECTION_CIRCLE_STROKE_WIDTH);
+        surroundingCircle.setVisible(false);
 
         label.textProperty().bind(contentProperty);
         label.setStyle("-fx-text-fill: white;");
 
-        pane.getChildren().addAll(circle, selectionCircle, label);
+        pane.getChildren().addAll(circle, surroundingCircle, label);
         super.getChildren().add(pane);
 
         // FIXME: the cursor style is not changed on Mac (Not tested on other platforms)
@@ -92,13 +91,17 @@ public class DFANodeComponent extends CanvasComponent {
 
     private void initPropertyListeners() {
         contentProperty.addListener((observable, oldValue, newValue) -> node.setContent(newValue));
+        isAcceptProperty.addListener((observable, oldValue, newValue) -> {
+            node.setAccepted(newValue);
+            surroundingCircle.setVisible(newValue);
+        });
     }
 
     /**
      * {@inheritDoc}
      */
     public void notifySelected() {
-        selectionCircle.setVisible(true);
+        this.setEffect(new Glow(1.0));
     }
 
     /**
@@ -106,6 +109,6 @@ public class DFANodeComponent extends CanvasComponent {
      */
     @Override
     public void notifyUnselected() {
-        selectionCircle.setVisible(false);
+        this.setEffect(null);
     }
 }

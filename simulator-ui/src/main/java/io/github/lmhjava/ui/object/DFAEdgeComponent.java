@@ -11,8 +11,6 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.Glow;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -69,10 +67,6 @@ public class DFAEdgeComponent extends CanvasComponent {
     public DFAEdgeComponent(DFANodeComponent tailNode) {
         this.tailNodeObj = new SimpleObjectProperty<>(tailNode);
         this.pane = new StackPane();
-        // FIXME: delete the following line of test code (2 lines)
-        this.pane.setStyle("-fx-background-color: rgba(255, 255, 255, 0.4);");
-        super.setBackground(new Background(new BackgroundFill(ARROW_COLOR, null, null)));
-
         this.headNodeObj = new SimpleObjectProperty<>(null);
         this.isSettled = false;
         this.arrow = new Path();
@@ -122,7 +116,7 @@ public class DFAEdgeComponent extends CanvasComponent {
 
             @Override
             protected Cursor computeValue() {
-                return isUpDown() ? Cursor.H_RESIZE : Cursor.V_RESIZE;
+                return isVertical() ? Cursor.H_RESIZE : Cursor.V_RESIZE;
             }
         });
     }
@@ -295,13 +289,17 @@ public class DFAEdgeComponent extends CanvasComponent {
         return headNodeObj.get() == tailNodeObj.get();
     }
 
-    public boolean isUpDown() {
+    public boolean isVertical() {
         return (45 < this.elevationAngleProperty.get() && this.elevationAngleProperty.get() < 135)
                 || (this.elevationAngleProperty.get() > -135 && this.elevationAngleProperty.get() < -45);
     }
 
     public boolean isLeftToRight() {
         return -90 < elevationAngleProperty.get() && elevationAngleProperty.get() < 90;
+    }
+
+    public boolean isUpToDown() {
+        return 45 < this.elevationAngleProperty.get() && this.elevationAngleProperty.get() < 135;
     }
 
     @Override

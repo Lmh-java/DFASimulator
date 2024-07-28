@@ -22,6 +22,8 @@ public class DFANode {
     private boolean onCurrentState;
     // content of the node
     private String content;
+    // if this node is accepted
+    private boolean isAccepted;
 
     public DFANode() {
         this.edges = new HashSet<>();
@@ -155,5 +157,13 @@ public class DFANode {
         }
         edges.remove(edge);
         return true;
+    }
+
+    public boolean isAccepted() {
+        return isAccepted;
+    }
+
+    public void setAccepted(boolean accepted) {
+        isAccepted = accepted;
     }
 }

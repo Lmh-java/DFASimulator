@@ -56,7 +56,12 @@ public class PropertyViewerController extends AppController {
     }
 
     public void updateSubject(final CanvasComponent component, final CanvasComponent previousComponent) {
-        // TODO: remove all the listeners to the previous component
+        if (previousComponent instanceof DFANodeComponent node) {
+            cleanUpNode(node);
+        } else if (previousComponent instanceof DFAEdgeComponent edge) {
+            cleanUpEdge(edge);
+        }
+
         if (component instanceof DFANodeComponent node) {
             displayNode(node);
         } else if (component instanceof DFAEdgeComponent edge) {
@@ -66,6 +71,15 @@ public class PropertyViewerController extends AppController {
         }
     }
 
+    private void cleanUpNode(final DFANodeComponent previousNode) {
+        previousNode.getContentProperty().unbind();
+        previousNode.getIsAcceptProperty().unbind();
+    }
+
+    private void cleanUpEdge(final DFAEdgeComponent previousEdge) {
+
+    }
+
     private void displayNode(final DFANodeComponent node) {
         propertyPane.getChildren().removeAll(dfaInfoPane, edgeInfoPane);
         if (!propertyPane.getChildren().contains(nodeInfoPane)) {
@@ -73,6 +87,9 @@ public class PropertyViewerController extends AppController {
         }
         nodeContentField.setText(node.getContentProperty().get());
         node.getContentProperty().bind(nodeContentField.textProperty());
+
+        nodeIsAcceptedCheckBox.setSelected(node.getIsAcceptProperty().get());
+        node.getIsAcceptProperty().bind(nodeIsAcceptedCheckBox.selectedProperty());
     }
 
     private void displayEdge(final DFAEdgeComponent edge) {
@@ -83,6 +100,9 @@ public class PropertyViewerController extends AppController {
     }
 
     private void displayDFA() {
-
+        propertyPane.getChildren().removeAll(edgeInfoPane, nodeInfoPane);
+        if (!propertyPane.getChildren().contains(dfaInfoPane)) {
+            propertyPane.getChildren().add(dfaInfoPane);
+        }
     }
 }

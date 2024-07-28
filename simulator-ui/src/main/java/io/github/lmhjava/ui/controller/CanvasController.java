@@ -202,10 +202,11 @@ public class CanvasController extends AppController {
                         // allows user to bend the arrow
                         if (!edge.isSelfLoop()) {
                             new DragToAdjustComponentController(edge, true, canvasModel, (deltaX, deltaY) -> {
-                                if (edge.isUpDown()) {
-                                    edge.setArrowControl(deltaX * (edge.isLeftToRight() ? 1 : -1));
+                                if (edge.isVertical()) {
+                                    log.debug(String.valueOf(edge.isLeftToRight()));
+                                    edge.setArrowControl(deltaX * (edge.isUpToDown() ? -1 : 1));
                                 } else {
-                                    edge.setArrowControl(deltaY * (edge.isLeftToRight() ? 1 : -1));
+                                    edge.setArrowControl(deltaY * (!edge.isLeftToRight() ? -1 : 1));
                                 }
                             });
                         }
