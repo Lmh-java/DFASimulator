@@ -1,6 +1,4 @@
-package io.github.lmhjava.engine.edge;
-
-import io.github.lmhjava.engine.node.DFANode;
+package io.github.lmhjava.engine.dfa;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,8 +9,8 @@ import java.util.Set;
  */
 
 public class DFAEdge {
-    private DFANode tail;
-    private DFANode head;
+    private final DFANode tail;
+    private final DFANode head;
     private Set<String> alphabet;
     private boolean isElseEdge;
 
@@ -41,16 +39,12 @@ public class DFAEdge {
         return head;
     }
 
-    public void setHead(DFANode head) {
-        this.head = head;
-    }
-
     public DFANode getTail() {
         return tail;
     }
 
     public Set<String> getAlphabet() {
-        return alphabet;
+        return new HashSet<>(alphabet);
     }
 
     public void setAlphabet(Set<String> alphabet) {
@@ -63,9 +57,5 @@ public class DFAEdge {
 
     public void addAllAlphabet(Set<String> alphabet) {
         this.alphabet.addAll(alphabet);
-    }
-
-    public void setTail(DFANode tail) {
-        this.tail = tail;
     }
 }

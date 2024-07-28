@@ -1,8 +1,6 @@
 package io.github.lmhjava.engine.dfa;
 
-import io.github.lmhjava.engine.edge.DFAEdge;
 import io.github.lmhjava.engine.exception.NextNodeUndefException;
-import io.github.lmhjava.engine.node.DFANode;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;

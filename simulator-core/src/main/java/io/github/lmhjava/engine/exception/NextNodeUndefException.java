@@ -1,6 +1,6 @@
 package io.github.lmhjava.engine.exception;
 
-import io.github.lmhjava.engine.node.DFANode;
+import io.github.lmhjava.engine.dfa.DFANode;
 
 public class NextNodeUndefException extends Exception {
     public NextNodeUndefException(DFANode from, String input) {

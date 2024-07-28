@@ -1,9 +1,7 @@
 package io.github.lmhjava.engine.dfa;
 
 
-import io.github.lmhjava.engine.edge.DFAEdge;
 import io.github.lmhjava.engine.exception.NextNodeUndefException;
-import io.github.lmhjava.engine.node.DFANode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -75,10 +73,8 @@ public class DFAControllerTest {
         assertFalse(controller.registerEdge(newEdge));
         controller.registerAlphabet("B");
 
-        // Accepted and Merged
+        // Accepted
         assertTrue(controller.registerEdge(newEdge));
-        assertFalse(controller.getEdgeSet().contains(newEdge));
-        assertEquals(2, testEdge.getAlphabet().size());
         // Check the tail node.
         assertTrue(testNode1.getEdges().contains(testEdge));
     }
@@ -99,8 +95,7 @@ public class DFAControllerTest {
 
         newEdge.setAlphabet(Set.of("B", "C"));
         assertTrue(controller.registerEdge(newEdge));
-        // Since the new alphabet will be merged, there will only be one edge
-        assertEquals(1, controller.getEdgeSet().size());
+        assertEquals(2, controller.getEdgeSet().size());
     }
 
     // Test addNode
@@ -142,7 +137,7 @@ public class DFAControllerTest {
     @Test
     public void testRemoveEdge() {
         initDFA();
-        controller.removeEdge(testEdge);
+        assertTrue(controller.removeEdge(testEdge));
         assertFalse(controller.getEdgeSet().contains(testEdge));
         assertFalse(testNode1.getEdges().contains(testEdge));
     }

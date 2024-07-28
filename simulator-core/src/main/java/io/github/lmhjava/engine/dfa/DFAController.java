@@ -1,13 +1,12 @@
 package io.github.lmhjava.engine.dfa;
 
-import io.github.lmhjava.engine.edge.DFAEdge;
 import io.github.lmhjava.engine.exception.NextNodeUndefException;
-import io.github.lmhjava.engine.node.DFANode;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Main controller of a DFA.
@@ -132,67 +131,24 @@ public class DFAController {
      * Add an edge to the current node.
      *
      * @param edge edge being added.
-     *             NOTE:
-     *             1. if newly-added edge has overlaps with pre-existing edges (same heads),
-     *             their alphabets will be merged, which results in only one edge.
-     *             2. if newly-added edge contains alphabet which is not in the alphabet set of
-     *             the DFA, this operation will be rejected.
-     *             3. if any end of edge contains a non-existing node, this operation will be rejected.
-     *             4. if the new edge contains already-registered alphabet in the node (e.g. other edge
+     * @implNote
+     *             1. if any end of edge contains a non-existing node, this operation will be rejected.
+     *             2. if the new edge contains already-registered alphabet in the node (e.g. other edge
      *             occupies the alphabet), this operation will be rejected.
+     *             3. If the new edge contains alphabet that is not registered in this DFA, this operation
+     *             will be rejected.
      * @return whether successfully added or not.
      */
     public boolean registerEdge(DFAEdge edge) {
-        assert edge != null;
-        // check preconditions
-        if (edge.getTail() == null || edge.getAlphabet() == null || edge.getHead() == null) return false;
-        // check if the node exists
-        if (!nodeSet.contains(edge.getTail()) || !nodeSet.contains(edge.getHead())) return false;
+        assert edge != null && edge.getTail() != null;
         // check if the new alphabet is a subset of the general alphabet set
         if (!alphabetSet.containsAll(edge.getAlphabet())) return false;
-        // check if the new alphabet is already contained in some other edges starting from the node
-        for (String a : edge.getAlphabet()) {
-            if (edge.getTail().getAlphabet().contains(a)) return false;
-        }
-        // is the newly added edge merged with other pre-existing edges?
-        if (edge.isElseEdge()) {
-            // the newly added edge is an ELSE edge, directly modify the node
-            if (edge.getTail().getElseEdge() != edge && edge.getHead().getElseEdge() != null) {
-                // remove the old else edge
-                edgeSet.remove(edge.getTail().getElseEdge());
-            }
-            // add the new else edge
+        // register edge to the tail node
+        if (edge.getTail().registerEdge(edge)) {
             edgeSet.add(edge);
-        } else {
-            boolean isMergedWithOthers = false;
-            for (DFAEdge e : edgeSet) {
-                if (e.getHead() == edge.getHead() && e.getTail() == edge.getTail()) {
-                    e.addAllAlphabet(edge.getAlphabet());
-                    isMergedWithOthers = true;
-                    break;
-                }
-            }
-            if (!isMergedWithOthers) {
-                edgeSet.add(edge);
-            }
+            return true;
         }
-        // update the relevant tail nodes to make sure they are also updated with the new edge info.
-        notifyEdgeTail(edge);
-        return true;
-    }
-
-    /**
-     * Update the tail node that has some relationship with the given edge.
-     * NOTE: Before calling this method, please make sure {@code this.edgeList} is up-to-date.
-     *
-     * @param edge relevant edge
-     */
-    private void notifyEdgeTail(DFAEdge edge) {
-        final Set<DFAEdge> relevantEdges = new HashSet<>();
-        edgeSet.forEach((DFAEdge e) -> {
-            if (e.getTail() == edge.getTail()) relevantEdges.add(e);
-        });
-        edge.getTail().setEdges(relevantEdges);
+        return false;
     }
 
     /**
@@ -237,12 +193,15 @@ public class DFAController {
      * Remove the given edge.
      *
      * @param edge edge to be deleted
+     * @return whether the edge is successfully removed
      */
-    public void removeEdge(DFAEdge edge) {
-        assert edge != null;
-        edgeSet.remove(edge);
-        // update the corresponding node
-        notifyEdgeTail(edge);
+    public boolean removeEdge(DFAEdge edge) {
+        assert edge != null && edge.getTail() != null;
+        if (edge.getTail().removeEdge(edge)) {
+            edgeSet.remove(edge);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -262,13 +221,18 @@ public class DFAController {
             currentNode = initialNode;
             initialNode.setOnCurrentState(true);
         }
-
         if (node == initialNode) {
             initialNode = null;
         }
 
-        // remove relevant edges
-        edgeSet.removeIf((DFAEdge e) -> e.getTail() == node || e.getHead() == node);
+        // find the subset of relevant edges
+        final Set<DFAEdge> removalSubset = edgeSet.stream()
+                .filter((DFAEdge e) -> e.getTail() == node || e.getHead() == node)
+                .collect(Collectors.toSet());
+        // notify these relevant nodes that these edges will be removed
+        removalSubset.forEach(e -> e.getTail().removeEdge(e));
+        // remove these edges
+        edgeSet.removeAll(removalSubset);
     }
 
     /**
@@ -317,5 +281,4 @@ public class DFAController {
         }
         return currentNode.getNextNode(input);
     }
-
 }

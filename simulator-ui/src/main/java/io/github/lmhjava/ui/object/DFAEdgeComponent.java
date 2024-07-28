@@ -1,6 +1,6 @@
 package io.github.lmhjava.ui.object;
 
-import io.github.lmhjava.engine.edge.DFAEdge;
+import io.github.lmhjava.engine.dfa.DFAEdge;
 import javafx.beans.binding.*;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;

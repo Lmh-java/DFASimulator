@@ -1,6 +1,6 @@
 package io.github.lmhjava.ui.object;
 
-import io.github.lmhjava.engine.node.DFANode;
+import io.github.lmhjava.engine.dfa.DFANode;
 import javafx.beans.binding.NumberBinding;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
