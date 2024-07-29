@@ -190,6 +190,17 @@ public class DFAController {
     }
 
     /**
+     * Remove alphabet from DFA.
+     *
+     * @param alphabet remove alphabet
+     */
+    public void unregisterAlphabet(String alphabet) {
+        assert alphabet != null;
+        this.alphabetSet.remove(alphabet);
+        // TODO: traverse alphabet set and erase this alphabet
+    }
+
+    /**
      * Remove the given edge.
      *
      * @param edge edge to be deleted

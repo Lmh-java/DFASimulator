@@ -85,7 +85,6 @@ public class DFANodeComponent extends CanvasComponent {
         pane.getChildren().addAll(circle, surroundingCircle, label);
         super.getChildren().add(pane);
 
-        // FIXME: the cursor style is not changed on Mac (Not tested on other platforms)
         this.setCursor(Cursor.HAND);
     }
 
@@ -110,5 +109,11 @@ public class DFANodeComponent extends CanvasComponent {
     @Override
     public void notifyUnselected() {
         this.setEffect(null);
+    }
+
+    @Override
+    public void sync() {
+        contentProperty.set(node.getContent());
+        isAcceptProperty.set(node.isAccepted());
     }
 }

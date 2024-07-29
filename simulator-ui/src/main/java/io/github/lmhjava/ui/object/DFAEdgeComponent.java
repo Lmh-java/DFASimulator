@@ -5,6 +5,7 @@ import javafx.beans.binding.*;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
@@ -20,6 +21,7 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.QuadCurveTo;
 import javafx.scene.transform.Transform;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.StringJoiner;
@@ -41,7 +43,6 @@ public class DFAEdgeComponent extends CanvasComponent {
     private static final double SELF_LOOP_ARROW_HEAD_LENGTH = ARROW_HEAD_LENGTH / 2d;
     private static final double SELF_LOOP_ARROW_HEAD_ANGLE = ARROW_HEAD_ANGLE / 2d;
 
-
     private DFAEdge edge;
     private final ObjectProperty<DFANodeComponent> tailNodeObj;
     private final ObjectProperty<DFANodeComponent> headNodeObj;
@@ -58,6 +59,7 @@ public class DFAEdgeComponent extends CanvasComponent {
     private final MoveTo tipPoint;
 
     private final Label alphabetLabel;
+    @Getter
     private final ObservableSet<String> alphabets;
 
     // These two following properties will not be used until edge is settled
@@ -85,7 +87,13 @@ public class DFAEdgeComponent extends CanvasComponent {
      * Initialize the alphabet set listener to sync information from the core DFA engine.
      */
     private void initAlphabetListener() {
-        Bindings.bindContent(edge.getAlphabet(), this.alphabets);
+        this.alphabets.addListener((SetChangeListener.Change<? extends String> c) -> {
+            if (c.wasAdded()) {
+                edge.addAlphabet(c.getElementAdded());
+            } else if (c.wasRemoved()) {
+                edge.removeAlphabet(c.getElementRemoved());
+            }
+        });
         this.alphabetLabel.textProperty().bind(new StringBinding() {
             {
                 this.bind(alphabets);
@@ -242,9 +250,6 @@ public class DFAEdgeComponent extends CanvasComponent {
         // initiate an edge model
         this.edge = new DFAEdge(tailNodeObj.get().getNode(), headNodeObj.get().getNode());
         initAlphabetListener();
-        // FIXME: remove the following test code (2 lines)
-        alphabets.add("Test1");
-        alphabets.add("Test2");
     }
 
     /**
@@ -337,5 +342,11 @@ public class DFAEdgeComponent extends CanvasComponent {
 
     public DFANodeComponent getHeadNode() {
         return headNodeObj.get();
+    }
+
+    @Override
+    public void sync() {
+        alphabets.clear();
+        alphabets.addAll(edge.getAlphabet());
     }
 }

@@ -55,6 +55,11 @@ public class DFAEdge {
         this.alphabet.add(alphabet);
     }
 
+    public void removeAlphabet(String alphabet) {
+        // TODO: update tail node;
+        this.alphabet.remove(alphabet);
+    }
+
     public void addAllAlphabet(Set<String> alphabet) {
         this.alphabet.addAll(alphabet);
     }

@@ -42,4 +42,9 @@ public abstract class CanvasComponent extends Region implements Selectable {
      * {@inheritDoc}
      */
     public abstract void notifyUnselected();
+
+    /**
+     * Sync information with dfa engine model
+     */
+    public abstract void sync();
 }
