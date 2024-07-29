@@ -159,6 +159,9 @@ public class PropertyViewerController extends AppController {
                 return cell;
             }
         });
+
+        edgeIsElseEdgeCheckBox.setSelected(edge.getIsElseProperty().get());
+        edge.getIsElseProperty().bind(edgeIsElseEdgeCheckBox.selectedProperty());
     }
 
     private void displayDFA() {

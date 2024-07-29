@@ -57,10 +57,12 @@ public class DFAEdgeComponent extends CanvasComponent {
     private final LineTo leftArrowHead;
     private final LineTo rightArrowHead;
     private final MoveTo tipPoint;
-
     private final Label alphabetLabel;
+
     @Getter
     private final ObservableSet<String> alphabets;
+    @Getter
+    private final BooleanProperty isElseProperty;
 
     // These two following properties will not be used until edge is settled
     private DoubleBinding elevationAngleProperty;
@@ -81,12 +83,13 @@ public class DFAEdgeComponent extends CanvasComponent {
         this.alphabets = FXCollections.observableSet();
         this.elevationAngleProperty = null;
         this.lengthProperty = null;
+        this.isElseProperty = new SimpleBooleanProperty(false);
     }
 
     /**
-     * Initialize the alphabet set listener to sync information from the core DFA engine.
+     * Initialize the properties listeners to sync information from the core DFA engine.
      */
-    private void initAlphabetListener() {
+    private void initPropertyListeners() {
         this.alphabets.addListener((SetChangeListener.Change<? extends String> c) -> {
             if (c.wasAdded()) {
                 edge.addAlphabet(c.getElementAdded());
@@ -96,15 +99,19 @@ public class DFAEdgeComponent extends CanvasComponent {
         });
         this.alphabetLabel.textProperty().bind(new StringBinding() {
             {
-                this.bind(alphabets);
+                this.bind(alphabets, isElseProperty);
             }
 
             @Override
             protected String computeValue() {
+                if (isElseProperty.get()) return "ELSE";
                 final StringJoiner sj = new StringJoiner(", ", "{", "}");
                 alphabets.forEach(sj::add);
                 return sj.toString();
             }
+        });
+        this.isElseProperty.addListener((observable, oldValue, newValue) -> {
+            edge.setElseEdge(newValue);
         });
     }
 
@@ -249,7 +256,7 @@ public class DFAEdgeComponent extends CanvasComponent {
 
         // initiate an edge model
         this.edge = new DFAEdge(tailNodeObj.get().getNode(), headNodeObj.get().getNode());
-        initAlphabetListener();
+        initPropertyListeners();
     }
 
     /**
@@ -348,5 +355,6 @@ public class DFAEdgeComponent extends CanvasComponent {
     public void sync() {
         alphabets.clear();
         alphabets.addAll(edge.getAlphabet());
+        isElseProperty.set(edge.isElseEdge());
     }
 }
