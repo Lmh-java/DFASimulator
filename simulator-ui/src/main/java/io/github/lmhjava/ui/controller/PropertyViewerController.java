@@ -4,8 +4,8 @@ import io.github.lmhjava.ui.model.CanvasModel;
 import io.github.lmhjava.ui.object.CanvasComponent;
 import io.github.lmhjava.ui.object.DFAEdgeComponent;
 import io.github.lmhjava.ui.object.DFANodeComponent;
+import io.github.lmhjava.ui.util.EnhancedBindings;
 import javafx.collections.FXCollections;
-import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -69,13 +69,7 @@ public class PropertyViewerController extends AppController {
 
         // bind dfa information
         dfaAlphabetSetField.itemsProperty().set(FXCollections.observableArrayList(canvasModel.getDfaAlphabet().stream().toList()));
-        canvasModel.getDfaAlphabet().addListener((SetChangeListener.Change<? extends String> c) -> {
-            if (c.wasAdded()) {
-                dfaAlphabetSetField.getItems().add(c.getElementAdded());
-            } else if (c.wasRemoved()) {
-                dfaAlphabetSetField.getItems().remove(c.getElementRemoved());
-            }
-        });
+        EnhancedBindings.bindContent(dfaAlphabetSetField.getItems(), canvasModel.getDfaAlphabet());
     }
 
     public void updateSubject(final CanvasComponent component, final CanvasComponent previousComponent) {
@@ -89,8 +83,7 @@ public class PropertyViewerController extends AppController {
             case DFANodeComponent node -> displayNode(node);
             case DFAEdgeComponent edge -> displayEdge(edge);
             case null -> displayDFA();
-            default -> {
-            }
+            default -> {}
         }
     }
 
