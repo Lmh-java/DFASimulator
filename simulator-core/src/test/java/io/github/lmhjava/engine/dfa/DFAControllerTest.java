@@ -24,7 +24,7 @@ public class DFAControllerTest {
         testNode2 = new DFANode("Test 2");
         // constructs testNode1 - A -> testNode2
         testEdge = new DFAEdge(testNode1, testNode2);
-        testEdge.addAlphabet("A");
+        testEdge.registerAlphabet("A");
     }
 
     private void initDFA() {
@@ -68,7 +68,7 @@ public class DFAControllerTest {
 
         // Add another edge with overlaps
         DFAEdge newEdge = new DFAEdge(testNode1, testNode2);
-        newEdge.addAlphabet("B");
+        newEdge.registerAlphabet("B");
         // Rejected, alphabet is not registered into the DFA.
         assertFalse(controller.registerEdge(newEdge));
         controller.registerAlphabet("B");
@@ -88,12 +88,12 @@ public class DFAControllerTest {
         controller.registerAlphabet("A");
         controller.registerAlphabet("B");
         controller.registerAlphabet("C");
-        newEdge.addAllAlphabet(Set.of("A", "B", "C"));
+        newEdge.registerAllAlphabet(Set.of("A", "B", "C"));
         assertFalse(controller.registerEdge(newEdge));
         assertEquals(1, controller.getEdgeSet().size());
         controller.removeEdge(newEdge);
 
-        newEdge.setAlphabet(Set.of("B", "C"));
+        newEdge.registerAllAlphabet(Set.of("B", "C"));
         assertTrue(controller.registerEdge(newEdge));
         assertEquals(2, controller.getEdgeSet().size());
     }
@@ -147,8 +147,8 @@ public class DFAControllerTest {
     public void testRemoveEdgeWithElse() {
         initDFA();
         DFAEdge elseEdge = new DFAEdge(testNode1, testNode2);
-        elseEdge.addAlphabet("a");
-        elseEdge.addAlphabet("b");
+        elseEdge.registerAlphabet("a");
+        elseEdge.registerAlphabet("b");
         elseEdge.setElseEdge(true);
         controller.registerAlphabet(Set.of("a", "b"));
         controller.registerEdge(elseEdge);
@@ -201,7 +201,7 @@ public class DFAControllerTest {
 
         // build another connection from node 2 to node 1
         DFAEdge newEdge = new DFAEdge(testNode2, testNode1);
-        newEdge.addAlphabet("B");
+        newEdge.registerAlphabet("B");
         controller.registerAlphabet("B");
         controller.registerEdge(newEdge);
 
@@ -226,7 +226,7 @@ public class DFAControllerTest {
 
         // build another connection from node 2 to node 1
         DFAEdge newEdge = new DFAEdge(testNode2, testNode1);
-        newEdge.addAlphabet("B");
+        newEdge.registerAlphabet("B");
         controller.registerAlphabet("B");
         controller.registerEdge(newEdge);
 

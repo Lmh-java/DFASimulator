@@ -70,7 +70,7 @@ public class DFANode {
             if (e.isElseEdge()) {
                 this.elseEdge = e;
             } else {
-                e.getAlphabet().forEach((String key) -> this.transitionTable.put(key, e));
+                e.getAlphabets().forEach((String key) -> this.transitionTable.put(key, e));
             }
         });
     }
@@ -116,13 +116,11 @@ public class DFANode {
     protected boolean registerEdge(DFAEdge edge) {
         assert edge != null;
         // check null preconditions
-        if (edge.getTail() != this || edge.getHead() == null || edge.getAlphabet() == null) return false;
-        // check if alphabet set of the edge is empty
-        if (edge.getAlphabet().isEmpty() && !edge.isElseEdge()) return false;
+        if (edge.getTail() != this || edge.getHead() == null || edge.getAlphabets() == null) return false;
         // check if this edge is already registered
         if (edges.contains(edge) || elseEdge == edge) return false;
         // check if this edge contains alphabet key that is already registered
-        for (String al : edge.getAlphabet()) {
+        for (String al : edge.getAlphabets()) {
             if (transitionTable.containsKey(al)) return false;
         }
 
@@ -131,7 +129,7 @@ public class DFANode {
             elseEdge = edge;
         } else {
             edges.add(edge);
-            edge.getAlphabet().forEach((String al) -> transitionTable.put(al, edge));
+            edge.getAlphabets().forEach((String al) -> transitionTable.put(al, edge));
         }
         return true;
     }
@@ -152,7 +150,7 @@ public class DFANode {
             elseEdge = null;
             return true;
         }
-        for (String al : edge.getAlphabet()) {
+        for (String al : edge.getAlphabets()) {
             transitionTable.remove(al);
         }
         edges.remove(edge);
@@ -165,5 +163,37 @@ public class DFANode {
 
     public void setAccepted(boolean accepted) {
         isAccepted = accepted;
+    }
+
+    /**
+     * Bind a new alphabet with the edge
+     *
+     * @param alphabet alphabet being added
+     * @param edge edge bind to the new alphabet
+     * @implNote to call this function, caller must ensure the edge is already registered to a node.
+     * If not, caller must call addEdge directly. This function is only for adding alphabet for a pre-existing edge.
+     *
+     * @return successfully added or not
+     */
+    protected boolean addAlphabet(String alphabet, DFAEdge edge) {
+        assert alphabet != null && edge != null;
+        // check null preconditions
+        if (edge.getTail() != this || edge.getHead() == null || edge.getAlphabets() == null) return false;
+        // if edge is not registered to this node before
+        if (!edges.contains(edge) || transitionTable.containsKey(alphabet)) return false;
+
+        transitionTable.put(alphabet, edge);
+        return true;
+    }
+
+    /**
+     * Remove an alphabet registered in the node.
+     *
+     * @implNote if the alphabet is not registered yet, this function will do nothing.
+     * @param alphabet alphabet to be removed.
+     */
+    protected void removeAlphabet(String alphabet) {
+        assert alphabet != null;
+        transitionTable.remove(alphabet);
     }
 }

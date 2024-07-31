@@ -142,7 +142,7 @@ public class DFAController {
     public boolean registerEdge(DFAEdge edge) {
         assert edge != null && edge.getTail() != null;
         // check if the new alphabet is a subset of the general alphabet set
-        if (!alphabetSet.containsAll(edge.getAlphabet())) return false;
+        if (!alphabetSet.containsAll(edge.getAlphabets())) return false;
         // register edge to the tail node
         if (edge.getTail().registerEdge(edge)) {
             edgeSet.add(edge);
@@ -197,7 +197,8 @@ public class DFAController {
     public void unregisterAlphabet(String alphabet) {
         assert alphabet != null;
         this.alphabetSet.remove(alphabet);
-        // TODO: traverse alphabet set and erase this alphabet
+        // only need to traverse all the edges, these edges will notify nodes to update
+        edgeSet.forEach((DFAEdge edge) -> edge.unregisterAlphabet(alphabet));
     }
 
     /**
@@ -298,7 +299,14 @@ public class DFAController {
      *
      * @return true if the DFA is on a accepted state. Otherwise, false.
      */
-    public boolean isAccepted() {
+    public boolean onAcceptState() {
         return currentNode != null && currentNode.isAccepted();
+    }
+
+    /**
+     * Reset controller to the initial state.
+     */
+    public void reset() {
+        currentNode = null;
     }
 }

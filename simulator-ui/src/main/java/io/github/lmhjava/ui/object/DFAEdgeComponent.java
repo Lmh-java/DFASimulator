@@ -92,9 +92,9 @@ public class DFAEdgeComponent extends CanvasComponent {
     private void initPropertyListeners() {
         this.alphabets.addListener((SetChangeListener.Change<? extends String> c) -> {
             if (c.wasAdded()) {
-                edge.addAlphabet(c.getElementAdded());
+                edge.registerAlphabet(c.getElementAdded());
             } else if (c.wasRemoved()) {
-                edge.removeAlphabet(c.getElementRemoved());
+                edge.unregisterAlphabet(c.getElementRemoved());
             }
         });
         this.alphabetLabel.textProperty().bind(new StringBinding() {
@@ -354,7 +354,7 @@ public class DFAEdgeComponent extends CanvasComponent {
     @Override
     public void sync() {
         alphabets.clear();
-        alphabets.addAll(edge.getAlphabet());
+        alphabets.addAll(edge.getAlphabets());
         isElseProperty.set(edge.isElseEdge());
     }
 }

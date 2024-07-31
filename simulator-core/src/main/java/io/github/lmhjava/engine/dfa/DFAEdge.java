@@ -4,34 +4,44 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Abstract class represents a DFA edge connecting two DFA nodes
+ * A DFA edge connecting two DFA nodes
  *
  */
 
 public class DFAEdge {
     private final DFANode tail;
     private final DFANode head;
-    private Set<String> alphabet;
+    private final Set<String> alphabets;
     private boolean isElseEdge;
 
     public DFAEdge(DFANode tail, DFANode head) {
         this.tail = tail;
         this.head = head;
-        this.alphabet = new HashSet<>();
+        this.alphabets = new HashSet<>();
     }
 
     public DFAEdge(DFANode tail, DFANode head, String alphabet) {
         this.tail = tail;
         this.head = head;
-        this.alphabet = new HashSet<>();
-        this.alphabet.add(alphabet);
+        this.alphabets = new HashSet<>();
+        this.alphabets.add(alphabet);
     }
 
     public boolean isElseEdge() {
         return isElseEdge;
     }
 
+    /**
+     * Set this edge to be an else edge and notifies the tail node.
+     *
+     * @param elseEdge is else edge or not.
+     */
     public void setElseEdge(boolean elseEdge) {
+        if (elseEdge) {
+            tail.setElseEdge(this);
+        } else {
+            tail.setElseEdge(null);
+        }
         isElseEdge = elseEdge;
     }
 
@@ -43,24 +53,55 @@ public class DFAEdge {
         return tail;
     }
 
-    public Set<String> getAlphabet() {
-        return new HashSet<>(alphabet);
+    public Set<String> getAlphabets() {
+        return new HashSet<>(alphabets);
     }
 
-    public void setAlphabet(Set<String> alphabet) {
-        this.alphabet = alphabet;
+    /**
+     * Register an alphabet for this edge and update the tail node.
+     *
+     * @implNote the caller must ensure the new alphabet is registered in the associated {@code DFAController}
+     * to avoid unexpected behaviors.
+     * @param alphabet new alphabet
+     */
+    public void registerAlphabet(String alphabet) {
+        assert alphabet != null;
+        if (alphabets.contains(alphabet)) return;
+        this.tail.addAlphabet(alphabet, this);
+        this.alphabets.add(alphabet);
     }
 
-    public void addAlphabet(String alphabet) {
-        this.alphabet.add(alphabet);
+    /**
+     * Unregister an alphabet from this edge and update the tail node.
+     *
+     * @implNote if alphabet is not registered before this function is called,
+     * this function fails silently.
+     * @param alphabet alphabet to unregister
+     */
+    public void unregisterAlphabet(String alphabet) {
+        assert alphabet != null;
+        if (!alphabets.contains(alphabet)) return;
+        this.tail.removeAlphabet(alphabet);
+        this.alphabets.remove(alphabet);
     }
 
-    public void removeAlphabet(String alphabet) {
-        // TODO: update tail node;
-        this.alphabet.remove(alphabet);
+    /**
+     * Add all alphabet in a batch
+     *
+     * @param alphabets a set of alphabets
+     */
+    public void registerAllAlphabet(Set<String> alphabets) {
+        alphabets.forEach(this::registerAlphabet);
     }
 
-    public void addAllAlphabet(Set<String> alphabet) {
-        this.alphabet.addAll(alphabet);
+    /**
+     * Add all alphabet in a batch
+     *
+     * @param alphabets a set of alphabets
+     */
+    public void registerAllAlphabet(String... alphabets) {
+        for (String al: alphabets) {
+            registerAlphabet(al);
+        }
     }
 }
