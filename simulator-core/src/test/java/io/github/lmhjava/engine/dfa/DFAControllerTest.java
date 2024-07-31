@@ -5,6 +5,8 @@ import io.github.lmhjava.engine.exception.NextNodeUndefException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -250,5 +252,25 @@ public class DFAControllerTest {
         assertIterableEquals(controller.getAlphabetSet(), clone.getAlphabetSet());
         assertEquals(controller.getInitialNode(), clone.getInitialNode());
         assertNotEquals(controller.getCurrentNode(), clone.getCurrentNode());
+    }
+
+    // Test event listeners
+    @Test
+    public void testStateListeners() throws NextNodeUndefException {
+        initDFA();
+        final List<DFANode> path = new ArrayList<>();
+        controller.addListener(((oldNode, newNode) -> path.add(newNode)));
+        controller.setInitialNode(testNode1);
+
+        DFAEdge newEdge = new DFAEdge(testNode2, testNode1, "B");
+        controller.registerAlphabet("B");
+        controller.registerEdge(newEdge);
+        controller.next("A");
+        controller.next("B");
+        controller.next("A");
+        controller.next("B");
+        controller.next("A");
+        controller.next("B");
+        assertIterableEquals(path, List.of(testNode2, testNode1, testNode2, testNode1, testNode2, testNode1));
     }
 }

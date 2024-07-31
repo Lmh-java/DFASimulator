@@ -25,6 +25,9 @@ public class DFANode {
     // if this node is accepted
     private boolean isAccepted;
 
+    // a function to call when dfa is transited to current state
+    private Runnable onCurrentStateUpdate;
+
     public DFANode() {
         this.edges = new HashSet<>();
         this.transitionTable = new HashMap<>();
@@ -81,6 +84,11 @@ public class DFANode {
 
     public void setOnCurrentState(boolean onCurrentState) {
         this.onCurrentState = onCurrentState;
+        if (onCurrentState && onCurrentStateUpdate != null) onCurrentStateUpdate.run();
+    }
+
+    public void setOnCurrentStateUpdate(Runnable onCurrentStateUpdate) {
+        this.onCurrentStateUpdate = onCurrentStateUpdate;
     }
 
     /**

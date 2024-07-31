@@ -1,6 +1,7 @@
 package io.github.lmhjava.engine.dfa;
 
 import io.github.lmhjava.engine.exception.NextNodeUndefException;
+import io.github.lmhjava.engine.observable.ObservableController;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
  * Main controller of a DFA.
  * Each DFA has a corresponding controller.
  */
-public class DFAController {
+public class DFAController extends ObservableController {
     private final Set<DFAEdge> edgeSet;
     private final Set<DFANode> nodeSet;
     private DFANode currentNode;
@@ -268,6 +269,8 @@ public class DFAController {
         final DFANode nextNode = peek(input);
         currentNode.setOnCurrentState(false);
         nextNode.setOnCurrentState(true);
+        // notify all listeners
+        notifyChange(currentNode, nextNode);
         currentNode = nextNode;
         return nextNode;
     }
