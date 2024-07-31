@@ -6,9 +6,9 @@ import io.github.lmhjava.ui.object.DFAEdgeComponent;
 import io.github.lmhjava.ui.object.DFANodeComponent;
 import io.github.lmhjava.ui.util.EnhancedBindings;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -66,10 +66,19 @@ public class PropertyViewerController extends AppController {
         this.canvasModel = canvasModel;
         canvasModel.getSelectedComponent().addListener((observable, oldValue, newValue) -> updateSubject(newValue, oldValue));
         propertyPane.getChildren().removeAll(edgeInfoPane, nodeInfoPane);
+        displayDFA();
 
         // bind dfa information
         dfaAlphabetSetField.itemsProperty().set(FXCollections.observableArrayList(canvasModel.getDfaAlphabet().stream().toList()));
         EnhancedBindings.bindContent(dfaAlphabetSetField.getItems(), canvasModel.getDfaAlphabet());
+
+        // optimize user interaction: user can quickly add new alphabet element without moving mouse
+        newAlphabetField.setOnKeyPressed(event -> {
+            if (newAlphabetField.isFocused() && event.getCode() == KeyCode.ENTER) {
+                addAlphabetElementToList();
+                newAlphabetField.requestFocus();
+            }
+        });
     }
 
     public void updateSubject(final CanvasComponent component, final CanvasComponent previousComponent) {
@@ -93,7 +102,7 @@ public class PropertyViewerController extends AppController {
     }
 
     private void cleanUpEdge(final DFAEdgeComponent previousEdge) {
-
+        previousEdge.getIsElseProperty().unbind();
     }
 
     private void displayNode(final DFANodeComponent node) {
@@ -164,7 +173,7 @@ public class PropertyViewerController extends AppController {
         }
     }
 
-    public void addAlphabetElementToList(ActionEvent event) {
+    public void addAlphabetElementToList() {
         if (Strings.isBlank(newAlphabetField.getText())) {
             newAlphabetField.setStyle("-fx-border-color: red");
         } else {

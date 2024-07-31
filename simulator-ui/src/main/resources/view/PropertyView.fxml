@@ -11,6 +11,9 @@
 
     <Label>
       Properties
+      <VBox.margin>
+        <Insets bottom="30.0"/>
+      </VBox.margin>
     </Label>
 
     <Region fx:id="iconRegion" VBox.vgrow="NEVER"/>

@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CanvasModel {
     private final ObservableSet<CanvasComponent> components;
     private final ObjectProperty<CanvasComponent> selectedComponent;
+    private final ObjectProperty<CanvasComponent> highlightedComponent;
 
     private final IntegerProperty contextMenuX;
     private final IntegerProperty contextMenuY;
@@ -30,6 +31,7 @@ public class CanvasModel {
     public CanvasModel() {
         components = FXCollections.observableSet();
         selectedComponent = new SimpleObjectProperty<>();
+        highlightedComponent = new SimpleObjectProperty<>();
         contextMenuX = new SimpleIntegerProperty(0);
         contextMenuY = new SimpleIntegerProperty(0);
         scale = new SimpleDoubleProperty(1.0);
@@ -58,6 +60,16 @@ public class CanvasModel {
         }
         if (component != null) {
             component.notifySelected();
+        }
+        selectedComponent.set(component);
+    }
+
+    public final void setHighlightedComponent(CanvasComponent component) {
+        if (highlightedComponent.get() != null) {
+            highlightedComponent.get().deHighlight();
+        }
+        if (component != null) {
+            component.onHighlight();
         }
         selectedComponent.set(component);
     }

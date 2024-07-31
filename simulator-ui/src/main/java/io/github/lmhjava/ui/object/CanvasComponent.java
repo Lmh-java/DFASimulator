@@ -47,4 +47,14 @@ public abstract class CanvasComponent extends Region implements Selectable {
      * Sync information with dfa engine model
      */
     public abstract void sync();
+
+    /**
+     * Notify the canvas component that it is highlighted.
+     */
+    public abstract void onHighlight();
+
+    /**
+     * Notify the canvas component that it is not highlighted.
+     */
+    public abstract void deHighlight();
 }

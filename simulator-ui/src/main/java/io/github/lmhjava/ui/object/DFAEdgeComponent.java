@@ -357,4 +357,14 @@ public class DFAEdgeComponent extends CanvasComponent {
         alphabets.addAll(edge.getAlphabets());
         isElseProperty.set(edge.isElseEdge());
     }
+
+    @Override
+    public void onHighlight() {
+
+    }
+
+    @Override
+    public void deHighlight() {
+
+    }
 }

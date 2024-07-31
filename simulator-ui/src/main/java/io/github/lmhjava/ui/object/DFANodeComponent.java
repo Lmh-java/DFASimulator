@@ -116,4 +116,14 @@ public class DFANodeComponent extends CanvasComponent {
         contentProperty.set(node.getContent());
         isAcceptProperty.set(node.isAccepted());
     }
+
+    @Override
+    public void onHighlight() {
+        circle.setFill(Color.YELLOW);
+    }
+
+    @Override
+    public void deHighlight() {
+        circle.setFill(Color.BLACK);
+    }
 }
