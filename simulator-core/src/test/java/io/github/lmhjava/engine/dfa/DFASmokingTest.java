@@ -50,4 +50,38 @@ public class DFASmokingTest {
         assertThrows(NextNodeUndefException.class, () -> controller.next("A"));
         assertEquals(node1, controller.next("B"));
     }
+
+    @Test
+    public void testRegisterAndRemoveAlphabets() throws NextNodeUndefException {
+        controller.registerAlphabet("A");
+        DFANode node1 = new DFANode("NODE1");
+        DFANode node2 = new DFANode("NODE2");
+        DFANode node3 = new DFANode("NODE3");
+        DFAEdge edge12 = new DFAEdge(node1, node2, "A");
+        DFAEdge edge13 = new DFAEdge(node2, node3, "A");
+        DFAEdge edge23 = new DFAEdge(node3, node1, "A");
+        controller.registerNode(node1);
+        controller.registerNode(node2);
+        controller.registerNode(node3);
+        controller.registerEdge(edge12);
+        controller.registerEdge(edge13);
+        controller.registerEdge(edge23);
+        controller.setInitialNode(node1);
+
+        assertEquals(3, controller.getNodeSet().size());
+        assertEquals(3, controller.getEdgeSet().size());
+        controller.registerAlphabet("B");
+        edge12.registerAlphabet("B");
+        assertEquals(node2, controller.next("B"));
+        controller.reset();
+
+        controller.unregisterAlphabet("B");
+        assertThrows(NextNodeUndefException.class, () -> controller.next("B"));
+        assertEquals(1, edge12.getAlphabets().size());
+
+        controller.reset();
+        edge12.setElseEdge(true);
+        edge12.unregisterAlphabet("A");
+        assertEquals(node2, controller.next("B"));
+    }
 }
