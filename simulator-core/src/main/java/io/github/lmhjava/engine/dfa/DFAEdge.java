@@ -13,6 +13,7 @@ public class DFAEdge {
     private final DFANode head;
     private final Set<String> alphabets;
     private boolean isElseEdge;
+    private boolean isRegistered;
 
     public DFAEdge(DFANode tail, DFANode head) {
         this.tail = tail;
@@ -31,16 +32,26 @@ public class DFAEdge {
         return isElseEdge;
     }
 
+    protected boolean isRegistered() {
+        return isRegistered;
+    }
+
+    protected void setRegistered(boolean registered) {
+        isRegistered = registered;
+    }
+
     /**
      * Set this edge to be an else edge and notifies the tail node.
      *
      * @param elseEdge is else edge or not.
      */
     public void setElseEdge(boolean elseEdge) {
-        if (elseEdge) {
-            tail.setElseEdge(this);
-        } else {
-            tail.setElseEdge(null);
+        if (this.isRegistered) {
+            if (elseEdge) {
+                tail.setElseEdge(this);
+            } else {
+                tail.setElseEdge(null);
+            }
         }
         isElseEdge = elseEdge;
     }
@@ -67,7 +78,9 @@ public class DFAEdge {
     public void registerAlphabet(String alphabet) {
         assert alphabet != null;
         if (alphabets.contains(alphabet)) return;
-        this.tail.addAlphabet(alphabet, this);
+        if (this.isRegistered) {
+            this.tail.addAlphabet(alphabet, this);
+        }
         this.alphabets.add(alphabet);
     }
 
@@ -81,7 +94,9 @@ public class DFAEdge {
     public void unregisterAlphabet(String alphabet) {
         assert alphabet != null;
         if (!alphabets.contains(alphabet)) return;
-        this.tail.removeAlphabet(alphabet);
+        if (this.isRegistered) {
+            this.tail.removeAlphabet(alphabet);
+        }
         this.alphabets.remove(alphabet);
     }
 

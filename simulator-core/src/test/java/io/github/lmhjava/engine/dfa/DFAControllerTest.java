@@ -96,8 +96,8 @@ public class DFAControllerTest {
         controller.removeEdge(newEdge);
 
         newEdge.registerAllAlphabet(Set.of("B", "C"));
-        assertTrue(controller.registerEdge(newEdge));
-        assertEquals(2, controller.getEdgeSet().size());
+        assertFalse(controller.registerEdge(newEdge));
+        assertEquals(1, controller.getEdgeSet().size());
     }
 
     // Test addNode

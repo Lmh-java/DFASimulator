@@ -147,6 +147,7 @@ public class DFAController extends ObservableController {
         // register edge to the tail node
         if (edge.getTail().registerEdge(edge)) {
             edgeSet.add(edge);
+            edge.setRegistered(true);
             return true;
         }
         return false;
@@ -212,6 +213,7 @@ public class DFAController extends ObservableController {
         assert edge != null && edge.getTail() != null;
         if (edge.getTail().removeEdge(edge)) {
             edgeSet.remove(edge);
+            edge.setRegistered(false);
             return true;
         }
         return false;
@@ -243,7 +245,10 @@ public class DFAController extends ObservableController {
                 .filter((DFAEdge e) -> e.getTail() == node || e.getHead() == node)
                 .collect(Collectors.toSet());
         // notify these relevant nodes that these edges will be removed
-        removalSubset.forEach(e -> e.getTail().removeEdge(e));
+        removalSubset.forEach(e -> {
+            e.getTail().removeEdge(e);
+            e.setRegistered(false);
+        });
         // remove these edges
         edgeSet.removeAll(removalSubset);
     }
