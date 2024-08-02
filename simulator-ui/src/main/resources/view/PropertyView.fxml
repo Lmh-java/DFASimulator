@@ -61,7 +61,7 @@
       <ListView GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="dfaAlphabetSetField"/>
 
       <HBox GridPane.columnIndex="1" GridPane.rowIndex="1">
-        <TextField promptText="Add a new alphabet element" fx:id="newAlphabetField"/>
+        <TextField promptText="Add a new alphabet element" fx:id="newAlphabetField" HBox.hgrow="ALWAYS"/>
         <Button onAction="#addAlphabetElementToList">Add</Button>
       </HBox>
     </GridPane>
