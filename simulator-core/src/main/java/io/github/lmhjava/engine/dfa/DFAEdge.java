@@ -119,4 +119,14 @@ public class DFAEdge {
             registerAlphabet(al);
         }
     }
+
+    @Override
+    public String toString() {
+        return "DFAEdge{\nTail Node = " + tail + "\n" +
+                "Head Node = " + head + "\n" +
+                "Alphabets = " + alphabets + "\n" +
+                "Is Else Edge = " + isElseEdge + "\n" +
+                "Is Registered = " + isRegistered + "\n" +
+                "ID = " + super.toString() + "}\n";
+    }
 }

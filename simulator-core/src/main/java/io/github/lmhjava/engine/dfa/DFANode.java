@@ -204,4 +204,12 @@ public class DFANode {
         assert alphabet != null;
         transitionTable.remove(alphabet);
     }
+
+    @Override
+    public String toString() {
+        return "DFANode{" + "Content = '" + content + '\n' +
+                "Is Accepted = " + isAccepted + '\n' +
+                "On Current State = " + onCurrentState + '\n' +
+                "ID = " + super.toString() + "}\n";
+    }
 }

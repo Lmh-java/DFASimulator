@@ -12,6 +12,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.BasicConfigurator;
@@ -84,6 +85,7 @@ public class Main extends Application {
         debugStage.setTitle("DEBUG VIEW");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/debug/DebugView.fxml"));
         debugStage.setScene(new Scene(loader.load()));
+        debugStage.initModality(Modality.APPLICATION_MODAL);
         debugStage.show();
     }
 }
