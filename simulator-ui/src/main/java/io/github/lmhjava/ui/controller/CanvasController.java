@@ -178,6 +178,7 @@ public class CanvasController extends AppController {
 
         // make the node draggable
         new DraggableCanvasComponentController(node, true, canvasModel);
+        canvasModel.getDfaController().registerNode(node.getNode());
         canvasModel.getComponents().add(node);
         log.debug("Add a node at [x={}, y={}]", x, y);
     }
@@ -203,7 +204,6 @@ public class CanvasController extends AppController {
                         if (!edge.isSelfLoop()) {
                             new DragToAdjustComponentController(edge, true, canvasModel, (deltaX, deltaY) -> {
                                 if (edge.isVertical()) {
-                                    log.debug(String.valueOf(edge.isLeftToRight()));
                                     edge.setArrowControl(deltaX * (edge.isUpToDown() ? -1 : 1));
                                 } else {
                                     edge.setArrowControl(deltaY * (!edge.isLeftToRight() ? -1 : 1));
@@ -222,6 +222,7 @@ public class CanvasController extends AppController {
                         });
                         // remove this listener
                         canvasModel.getSelectedComponent().removeListener(this);
+                        canvasModel.getDfaController().registerEdge(edge.getEdge());
                         initKeyboardListeners();
                     }
                 }

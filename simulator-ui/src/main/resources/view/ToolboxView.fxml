@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<HBox xmlns="http://javafx.com/javafx"
+
+<!--Icon cheatsheet for the package is located at https://kordamp.org/ikonli/cheat-sheet-materialdesign.html-->
+
+<ToolBar xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="io.github.lmhjava.ui.controller.ToolboxController" spacing="2">
+      fx:controller="io.github.lmhjava.ui.controller.ToolboxController">
     <Button fx:id="selectButton">
         <tooltip>
             <Tooltip text="select a DFA object" />
@@ -39,4 +40,34 @@
             <FontIcon iconLiteral="mdi-vector-line"/>
         </graphic>
     </Button>
-</HBox>
+
+    <Separator />
+
+    <TextField promptText="Test an Input" fx:id="inputTextField" />
+    <Button fx:id="stepOverDebuggerButton" onAction="#onStepOverDebuggerButtonClicked">
+        <tooltip>
+            <Tooltip text="Take ONE step forward." />
+        </tooltip>
+        <graphic>
+            <FontIcon iconLiteral="mdi-arrow-down-bold"/>
+        </graphic>
+    </Button>
+
+    <Button fx:id="resumeDebuggerButton" onAction="#onResumeDebuggerButtonClicked">
+        <tooltip>
+            <Tooltip text="Resume the debugger until it finishes."/>
+        </tooltip>
+        <graphic>
+            <FontIcon iconLiteral="mdi-play"/>
+        </graphic>
+    </Button>
+
+    <Button fx:id="stopDebuggerButton" onAction="#onStopDebuggerButtonClicked">
+        <tooltip>
+            <Tooltip text="Stop the debugger immediately."/>
+        </tooltip>
+        <graphic>
+            <FontIcon iconLiteral="mdi-stop"/>
+        </graphic>
+    </Button>
+</ToolBar>

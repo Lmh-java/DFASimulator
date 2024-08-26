@@ -52,15 +52,15 @@
       <CheckBox GridPane.columnIndex="1" GridPane.rowIndex="3" fx:id="nodeIsAcceptedCheckBox" />
     </GridPane>
 
-    <GridPane fx:id="dfaInfoPane" VBox.vgrow="ALWAYS" hgap="20" vgap="10">
+    <GridPane fx:id="dfaInfoPane" VBox.vgrow="ALWAYS" hgap="20" vgap="5">
       <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES"/>
         <ColumnConstraints hgrow="ALWAYS"/>
       </columnConstraints>
       <Label GridPane.columnIndex="0" GridPane.rowIndex="0" alignment="BASELINE_RIGHT" wrapText="true" prefHeight="15">Alphabets</Label>
-      <ListView GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="dfaAlphabetSetField"/>
+      <ListView GridPane.columnIndex="0" GridPane.rowIndex="1" fx:id="dfaAlphabetSetField"/>
 
-      <HBox GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <HBox GridPane.columnIndex="0" GridPane.rowIndex="2">
         <TextField promptText="Add a new alphabet element" fx:id="newAlphabetField" HBox.hgrow="ALWAYS"/>
         <Button onAction="#addAlphabetElementToList">Add</Button>
       </HBox>

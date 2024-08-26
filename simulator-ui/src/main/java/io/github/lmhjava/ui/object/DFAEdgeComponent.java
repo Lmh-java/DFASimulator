@@ -43,6 +43,7 @@ public class DFAEdgeComponent extends CanvasComponent {
     private static final double SELF_LOOP_ARROW_HEAD_LENGTH = ARROW_HEAD_LENGTH / 2d;
     private static final double SELF_LOOP_ARROW_HEAD_ANGLE = ARROW_HEAD_ANGLE / 2d;
 
+    @Getter
     private DFAEdge edge;
     private final ObjectProperty<DFANodeComponent> tailNodeObj;
     private final ObjectProperty<DFANodeComponent> headNodeObj;
