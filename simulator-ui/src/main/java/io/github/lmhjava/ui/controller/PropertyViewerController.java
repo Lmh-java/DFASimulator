@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 
 @Slf4j
-public class PropertyViewerController extends AppController {
+public class PropertyViewerController extends BaseAppController {
     @FXML
     public Region iconRegion;
 

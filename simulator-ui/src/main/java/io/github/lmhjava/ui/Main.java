@@ -1,9 +1,10 @@
 package io.github.lmhjava.ui;
 
-import io.github.lmhjava.ui.controller.AppController;
+import io.github.lmhjava.ui.controller.BaseAppController;
 import io.github.lmhjava.ui.controller.CanvasController;
 import io.github.lmhjava.ui.controller.PropertyViewerController;
 import io.github.lmhjava.ui.controller.ToolboxController;
+import io.github.lmhjava.ui.debug.controller.DebugController;
 import io.github.lmhjava.ui.model.CanvasModel;
 import io.github.lmhjava.ui.model.GlobalContext;
 import io.github.lmhjava.ui.util.ScreenUtils;
@@ -14,6 +15,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.BasicConfigurator;
+
+import java.io.IOException;
 
 /**
  * Main entrance of application
@@ -26,14 +29,14 @@ public class Main extends Application {
     /**
      * Turn this debug flag to true to get access to debug features
      */
-    private final static boolean DEBUG_MODE = false;
+    private final static boolean DEBUG_MODE = true;
 
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AppView.fxml"));
         Parent root = loader.load();
 
-        final AppController appController = loader.getController();
+        final BaseAppController appController = loader.getController();
         log.debug("Initialized {} controllers : {}", GlobalContext.controllers.size(), GlobalContext.controllers);
 
         // load canvas
@@ -49,6 +52,13 @@ public class Main extends Application {
         final ToolboxController toolboxController = (ToolboxController) GlobalContext.controllers.get("ToolboxController");
         toolboxController.initModel(canvasModel);
 
+        // debug tool box
+        if (DEBUG_MODE) {
+            showDebugView();
+            final DebugController debugController = (DebugController) GlobalContext.controllers.get("DebugController");
+            debugController.initModel(canvasModel);
+        }
+
         Scene mainScene = new Scene(root, ScreenUtils.getScreenWidth(), ScreenUtils.getScreenHeight());
         stage.setScene(mainScene);
         stage.setTitle(APP_TITLE);
@@ -57,10 +67,23 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         // configure log4j system
-        BasicConfigurator.configure();
+        if (DEBUG_MODE) {
+            BasicConfigurator.configure();
+        }
 
         // launch GUI
         log.debug("Application started");
         launch(args);
+    }
+
+    /**
+     * Display debug view
+     */
+    public void showDebugView() throws IOException {
+        Stage debugStage = new Stage();
+        debugStage.setTitle("DEBUG VIEW");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/debug/DebugView.fxml"));
+        debugStage.setScene(new Scene(loader.load()));
+        debugStage.show();
     }
 }

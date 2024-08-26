@@ -11,7 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import org.apache.logging.log4j.util.Strings;
 
-public class ToolboxController extends AppController {
+public class ToolboxController extends BaseAppController {
 
     @FXML
     private TextField inputTextField;
