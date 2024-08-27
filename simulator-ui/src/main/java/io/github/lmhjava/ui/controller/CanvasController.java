@@ -179,6 +179,7 @@ public class CanvasController extends BaseAppController {
         // make the node draggable
         new DraggableCanvasComponentController(node, true, canvasModel);
         canvasModel.getDfaController().registerNode(node.getNode());
+        node.getNode().setOnCurrentStateUpdate(() -> canvasModel.setHighlightedComponent(node));
         canvasModel.getComponents().add(node);
         log.debug("Add a node at [x={}, y={}]", x, y);
     }

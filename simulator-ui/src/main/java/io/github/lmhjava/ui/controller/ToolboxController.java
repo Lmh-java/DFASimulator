@@ -44,6 +44,9 @@ public class ToolboxController extends BaseAppController {
 
     private CanvasModel canvasModel;
 
+    // current character on the input
+    private String currentChar;
+
     /**
      * Initialize the canvas model
      *
@@ -92,10 +95,12 @@ public class ToolboxController extends BaseAppController {
         // check validity
         if (Strings.isBlank(inputTextField.getText())) {
             // TODO: set the boarder to red
+            return;
         }
 
         try {
             debuggerController.next("step");
+            canvasModel.getDfaController().next(currentChar);
         } catch (NextNodeUndefException e) {
             // convert to runtime exception
             throw new RuntimeException(e);
@@ -104,6 +109,7 @@ public class ToolboxController extends BaseAppController {
 
     @FXML
     public void onStopDebuggerButtonClicked(ActionEvent unused) {
+        currentChar = null;
 
     }
 }

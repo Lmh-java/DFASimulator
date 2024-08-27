@@ -29,6 +29,7 @@ public class DFANodeComponent extends CanvasComponent {
     private static final int NODE_CIRCLE_STROKE_WIDTH = 5;
     private static final int SELECTION_CIRCLE_STROKE_WIDTH = 2;
     private static final Paint NODE_CIRCLE_STROKE = Color.BLACK;
+    private static final Paint INITIAL_NODE_CIRCLE_STROKE = Color.GREEN;
 
     @Getter
     private final DFANode node;
@@ -93,6 +94,17 @@ public class DFANodeComponent extends CanvasComponent {
         isAcceptProperty.addListener((observable, oldValue, newValue) -> {
             node.setAccepted(newValue);
             surroundingCircle.setVisible(newValue);
+        });
+        isInitialProperty.addListener((observable, oldValue, newValue) -> {
+           if (newValue) {
+               circle.setFill(INITIAL_NODE_CIRCLE_STROKE);
+               circle.setStroke(INITIAL_NODE_CIRCLE_STROKE);
+               surroundingCircle.setStroke(INITIAL_NODE_CIRCLE_STROKE);
+           } else {
+               circle.setFill(NODE_CIRCLE_STROKE);
+               circle.setStroke(NODE_CIRCLE_STROKE);
+               surroundingCircle.setStroke(NODE_CIRCLE_STROKE);
+           }
         });
     }
 

@@ -62,6 +62,11 @@ public class PropertyViewerController extends BaseAppController {
 
     private CanvasModel canvasModel;
 
+    /**
+     * initialize canvas model
+     *
+     * @param canvasModel canvas model
+     */
     public void initModel(final CanvasModel canvasModel) {
         this.canvasModel = canvasModel;
         canvasModel.getSelectedComponent().addListener((observable, oldValue, newValue) -> updateSubject(newValue, oldValue));
@@ -81,6 +86,12 @@ public class PropertyViewerController extends BaseAppController {
         });
     }
 
+    /**
+     * Updates the subject whose property is shown
+     *
+     * @param component subject
+     * @param previousComponent previous subject
+     */
     public void updateSubject(final CanvasComponent component, final CanvasComponent previousComponent) {
         if (previousComponent instanceof DFANodeComponent node) {
             cleanUpNode(node);
@@ -96,11 +107,22 @@ public class PropertyViewerController extends BaseAppController {
         }
     }
 
+    /**
+     * Disconnects all the bindings related to the previous node.
+     *
+     * @param previousNode previous node component
+     */
     private void cleanUpNode(final DFANodeComponent previousNode) {
         previousNode.getContentProperty().unbind();
         previousNode.getIsAcceptProperty().unbind();
+        nodeIsAcceptedCheckBox.setOnMouseClicked(event -> {});
     }
 
+    /**
+     * Disconnects all the bindings related to the previous edge.
+     *
+     * @param previousEdge previous edge.
+     */
     private void cleanUpEdge(final DFAEdgeComponent previousEdge) {
         previousEdge.getIsElseProperty().unbind();
     }
@@ -115,6 +137,9 @@ public class PropertyViewerController extends BaseAppController {
 
         nodeIsAcceptedCheckBox.setSelected(node.getIsAcceptProperty().get());
         node.getIsAcceptProperty().bind(nodeIsAcceptedCheckBox.selectedProperty());
+
+        nodeIsInitialCheckBox.setSelected(node.getNode() != null && node.getNode().equals(canvasModel.getDfaController().getInitialNode()));
+        nodeIsInitialCheckBox.setOnMouseClicked((mouseEvent -> canvasModel.setInitialNode(nodeIsInitialCheckBox.isSelected() ? node : null)));
     }
 
     private void displayEdge(final DFAEdgeComponent edge) {

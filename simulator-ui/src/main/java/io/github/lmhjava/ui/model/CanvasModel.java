@@ -2,6 +2,7 @@ package io.github.lmhjava.ui.model;
 
 import io.github.lmhjava.engine.dfa.DFAController;
 import io.github.lmhjava.ui.object.CanvasComponent;
+import io.github.lmhjava.ui.object.DFANodeComponent;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -19,6 +20,7 @@ public class CanvasModel {
     private final ObservableSet<CanvasComponent> components;
     private final ObjectProperty<CanvasComponent> selectedComponent;
     private final ObjectProperty<CanvasComponent> highlightedComponent;
+    private final ObjectProperty<DFANodeComponent> initialNodeComponent;
 
     private final IntegerProperty contextMenuX;
     private final IntegerProperty contextMenuY;
@@ -32,6 +34,7 @@ public class CanvasModel {
         components = FXCollections.observableSet();
         selectedComponent = new SimpleObjectProperty<>();
         highlightedComponent = new SimpleObjectProperty<>();
+        initialNodeComponent = new SimpleObjectProperty<>();
         contextMenuX = new SimpleIntegerProperty(0);
         contextMenuY = new SimpleIntegerProperty(0);
         scale = new SimpleDoubleProperty(1.0);
@@ -72,5 +75,18 @@ public class CanvasModel {
             component.onHighlight();
         }
         selectedComponent.set(component);
+    }
+
+    public final void setInitialNode(DFANodeComponent node) {
+        if (initialNodeComponent.get() != null) {
+            initialNodeComponent.get().getIsInitialProperty().set(false);
+        }
+        if (node != null) {
+            node.getIsInitialProperty().set(true);
+            dfaController.setInitialNode(node.getNode());
+        } else {
+            dfaController.setInitialNode(null);
+        }
+        initialNodeComponent.set(node);
     }
 }
