@@ -74,14 +74,19 @@ public class DFAEdge {
      * @implNote the caller must ensure the new alphabet is registered in the associated {@code DFAController}
      * to avoid unexpected behaviors.
      * @param alphabet new alphabet
+     * @return true if successfully registered, false otherwise
      */
-    public void registerAlphabet(String alphabet) {
+    public boolean registerAlphabet(String alphabet) {
         assert alphabet != null;
-        if (alphabets.contains(alphabet)) return;
+        if (alphabets.contains(alphabet)) return true;
         if (this.isRegistered) {
-            this.tail.addAlphabet(alphabet, this);
+            final boolean added = this.tail.addAlphabet(alphabet, this);
+            if (!added) {
+                return false;
+            }
         }
         this.alphabets.add(alphabet);
+        return true;
     }
 
     /**

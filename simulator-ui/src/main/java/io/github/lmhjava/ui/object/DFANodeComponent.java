@@ -136,6 +136,10 @@ public class DFANodeComponent extends CanvasComponent {
 
     @Override
     public void deHighlight() {
-        circle.setFill(Color.BLACK);
+        if (isInitialProperty.get()) {
+            circle.setFill(INITIAL_NODE_CIRCLE_STROKE);
+        } else {
+            circle.setFill(NODE_CIRCLE_STROKE);
+        }
     }
 }

@@ -2,10 +2,10 @@ package io.github.lmhjava.ui.controller;
 
 
 import io.github.lmhjava.ui.model.CanvasModel;
+import io.github.lmhjava.ui.model.GlobalContext;
 import io.github.lmhjava.ui.object.CanvasComponent;
 import io.github.lmhjava.ui.object.DFAEdgeComponent;
 import io.github.lmhjava.ui.object.DFANodeComponent;
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
@@ -17,6 +17,8 @@ import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * Canvas controller
@@ -185,6 +187,19 @@ public class CanvasController extends BaseAppController {
     }
 
     /**
+     * Add a node roughly in the center of the current viewport.
+     */
+    public void addNodeAtVisibleCenter() {
+        final Bounds viewPort = scrollPane.getViewportBounds();
+        final Bounds contentSize = canvasPane.getBoundsInParent();
+        final double centerPosX = (contentSize.getWidth() - viewPort.getWidth()) * scrollPane.getHvalue() + viewPort.getWidth() / 2;
+        final double centerPosY = (contentSize.getHeight() - viewPort.getHeight()) * scrollPane.getVvalue() + viewPort.getHeight() / 2;
+        final int nodeTopLeftX = (int) centerPosX - DFANodeComponent.NODE_CIRCLE_RADIUS - DFANodeComponent.SELECTION_CIRCLE_THICKNESS;
+        final int nodeTopLeftY = (int) centerPosY - DFANodeComponent.NODE_CIRCLE_RADIUS - DFANodeComponent.SELECTION_CIRCLE_THICKNESS;
+        addNode(nodeTopLeftX, nodeTopLeftY);
+    }
+
+    /**
      * Add an edge to the canvas
      */
     public void addEdge() {
@@ -223,7 +238,11 @@ public class CanvasController extends BaseAppController {
                         });
                         // remove this listener
                         canvasModel.getSelectedComponent().removeListener(this);
-                        canvasModel.getDfaController().registerEdge(edge.getEdge());
+                        final boolean registrationSuccess = canvasModel.getDfaController().registerEdge(edge.getEdge());
+                        if (!registrationSuccess) {
+                            removeComponent(edge);
+                            showError("Edge registration failed: check duplicate symbols/ELSE conflicts on the tail node.");
+                        }
                         initKeyboardListeners();
                     }
                 }
@@ -287,14 +306,34 @@ public class CanvasController extends BaseAppController {
     private void removeComponent(CanvasComponent component) {
         assert canvasModel.getComponents().contains(component);
         canvasModel.getComponents().remove(component);
-        // if user deletes a node, also delete relevant edges.
-        // NOTE: run this task in the background to save resources
         if (component instanceof DFANodeComponent c) {
-            Platform.runLater(() -> canvasModel.getComponents().removeIf((CanvasComponent comp) -> comp instanceof DFAEdgeComponent edge && (edge.getTailNode() == c || edge.getHeadNode() == c)));
+            final List<CanvasComponent> relevantEdges = canvasModel.getComponents().stream()
+                    .filter((CanvasComponent comp) -> comp instanceof DFAEdgeComponent edge && (edge.getTailNode() == c || edge.getHeadNode() == c))
+                    .toList();
+            relevantEdges.forEach(canvasModel.getComponents()::remove);
+            canvasModel.getDfaController().removeNode(c.getNode());
+            if (canvasModel.getInitialNodeComponent().get() == c) {
+                canvasModel.setInitialNode(null);
+            }
+            if (canvasModel.getHighlightedComponent().get() == c) {
+                canvasModel.setHighlightedComponent(null);
+            }
+        } else if (component instanceof DFAEdgeComponent c) {
+            canvasModel.getDfaController().removeEdge(c.getEdge());
+            if (canvasModel.getHighlightedComponent().get() == c) {
+                canvasModel.setHighlightedComponent(null);
+            }
         }
         // if the instance being deleted is selected, set the current selection to null
         if (component == canvasModel.getCurrentSelection()) {
             canvasModel.setCurrentSelection(null);
+        }
+    }
+
+    private void showError(String message) {
+        final Object controller = GlobalContext.controllers.get("MessageBarController");
+        if (controller instanceof MessageBarController barController) {
+            barController.showError(message);
         }
     }
 }

@@ -68,13 +68,16 @@ public class CanvasModel {
     }
 
     public final void setHighlightedComponent(CanvasComponent component) {
-        if (highlightedComponent.get() != null) {
-            highlightedComponent.get().deHighlight();
-        }
-        if (component != null) {
-            component.onHighlight();
-        }
-        selectedComponent.set(component);
+        // Ensure UI updates happen on JavaFX Application Thread
+        Platform.runLater(() -> {
+            if (highlightedComponent.get() != null) {
+                highlightedComponent.get().deHighlight();
+            }
+            if (component != null) {
+                component.onHighlight();
+            }
+            highlightedComponent.set(component);
+        });
     }
 
     public final void setInitialNode(DFANodeComponent node) {

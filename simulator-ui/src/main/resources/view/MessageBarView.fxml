@@ -3,9 +3,19 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.geometry.Insets?>
+
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="io.github.lmhjava.ui.controller.MessageBarController">
-  <Label>Test Message Bar Message ...</Label>
-  <Slider AnchorPane.rightAnchor="10" />
+  <HBox alignment="CENTER_LEFT" spacing="8"
+        AnchorPane.leftAnchor="0"
+        AnchorPane.rightAnchor="0"
+        AnchorPane.topAnchor="0"
+        AnchorPane.bottomAnchor="0">
+    <Label fx:id="messageLabel" text="Ready." HBox.hgrow="ALWAYS" style="-fx-background-color: #f3f4f6; -fx-text-fill: #111827; -fx-padding: 6 10 6 10;"/>
+    <padding>
+      <Insets top="6" right="10" bottom="6" left="10"/>
+    </padding>
+  </HBox>
 </AnchorPane>

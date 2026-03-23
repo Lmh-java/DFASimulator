@@ -21,7 +21,6 @@ A DFA Simulator to visualize DFA designs.
 TODO: Quick start will be available when the project is published on Maven
 
 ## 🔧 Usage
-
 TODO: Briefly explain how to use this library.
 
 ## ⏰ Performance

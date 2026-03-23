@@ -1,7 +1,7 @@
 package io.github.lmhjava.ui;
 
-import io.github.lmhjava.ui.controller.BaseAppController;
 import io.github.lmhjava.ui.controller.CanvasController;
+import io.github.lmhjava.ui.controller.MessageBarController;
 import io.github.lmhjava.ui.controller.PropertyViewerController;
 import io.github.lmhjava.ui.controller.ToolboxController;
 import io.github.lmhjava.ui.debug.controller.DebugController;
@@ -36,8 +36,6 @@ public class Main extends Application {
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AppView.fxml"));
         Parent root = loader.load();
-
-        final BaseAppController appController = loader.getController();
         log.debug("Initialized {} controllers : {}", GlobalContext.controllers.size(), GlobalContext.controllers);
 
         // load canvas
@@ -52,6 +50,9 @@ public class Main extends Application {
         // load tool box view
         final ToolboxController toolboxController = (ToolboxController) GlobalContext.controllers.get("ToolboxController");
         toolboxController.initModel(canvasModel);
+
+        final MessageBarController messageBarController = (MessageBarController) GlobalContext.controllers.get("MessageBarController");
+        messageBarController.showInfo("Ready. Use toolbar to add states and transitions.");
 
         // debug tool box
         if (DEBUG_MODE) {

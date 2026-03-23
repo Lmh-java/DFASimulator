@@ -113,7 +113,9 @@ public class DFAController extends ObservableController {
      * @param initialNode new initial node.
      */
     public void setInitialNode(DFANode initialNode) {
-        assert nodeSet.contains(initialNode);
+        if (initialNode != null) {
+            assert nodeSet.contains(initialNode);
+        }
         this.initialNode = initialNode;
     }
 
@@ -233,8 +235,12 @@ public class DFAController extends ObservableController {
         nodeSet.remove(node);
 
         if (node == currentNode) {
-            currentNode = initialNode;
-            initialNode.setOnCurrentState(true);
+            if (initialNode != null && initialNode != node) {
+                currentNode = initialNode;
+                initialNode.setOnCurrentState(true);
+            } else {
+                currentNode = null;
+            }
         }
         if (node == initialNode) {
             initialNode = null;
@@ -315,6 +321,9 @@ public class DFAController extends ObservableController {
      * Reset controller to the initial state.
      */
     public void reset() {
+        if (currentNode != null) {
+            currentNode.setOnCurrentState(false);
+        }
         currentNode = null;
     }
 }

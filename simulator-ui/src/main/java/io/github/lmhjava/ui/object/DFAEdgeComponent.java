@@ -64,6 +64,7 @@ public class DFAEdgeComponent extends CanvasComponent {
     private final ObservableSet<String> alphabets;
     @Getter
     private final BooleanProperty isElseProperty;
+    private boolean suppressAlphabetSync;
 
     // These two following properties will not be used until edge is settled
     private DoubleBinding elevationAngleProperty;
@@ -85,6 +86,7 @@ public class DFAEdgeComponent extends CanvasComponent {
         this.elevationAngleProperty = null;
         this.lengthProperty = null;
         this.isElseProperty = new SimpleBooleanProperty(false);
+        this.suppressAlphabetSync = false;
     }
 
     /**
@@ -92,8 +94,17 @@ public class DFAEdgeComponent extends CanvasComponent {
      */
     private void initPropertyListeners() {
         this.alphabets.addListener((SetChangeListener.Change<? extends String> c) -> {
+            if (suppressAlphabetSync) {
+                return;
+            }
             if (c.wasAdded()) {
-                edge.registerAlphabet(c.getElementAdded());
+                final String addedAlphabet = c.getElementAdded();
+                final boolean success = edge.registerAlphabet(addedAlphabet);
+                if (!success) {
+                    suppressAlphabetSync = true;
+                    alphabets.remove(addedAlphabet);
+                    suppressAlphabetSync = false;
+                }
             } else if (c.wasRemoved()) {
                 edge.unregisterAlphabet(c.getElementRemoved());
             }
